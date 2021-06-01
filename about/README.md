@@ -11,9 +11,9 @@ In my free time I like to fence, go hiking, travel, ski and snowboard if it's wi
 2. It's an international company with an interesting experience. I'll be excited to get a part of that experience and, by the way, free of charge,
 3. It's also the practice of the English language, if not during the course, then after the successful completion of the internship and employment,
 4. It's not very long, only 2 months. Which is cool. For me this course suggests to give as much results as it possible for a short time,
-5. This course will give me not only a new profession, but also a chance to get a job in this international company.
+5. This course will give me not only a new profession, but also a chance to get a job in this very company.
 
 ###### What I expect from that course?
 1. Get high-quality knowledge and skills, including international practices of DevOps,
-2. Expand my knowledge of AWS cloud, learn Google & Azure Clouds I've never worked with before.
+2. Expand my knowledge of AWS cloud, learn Google & Azure Clouds I've never worked with before,
 3. Get an interesting job offer in an international company when I'll pass an exam.
