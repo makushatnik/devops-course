@@ -1,0 +1,32 @@
+---
+- name: Deploy Telegram's Bot Application to AWS
+  hosts: aws-server
+  become: yes
+
+  tasks:
+
+  - name: Install Go
+    command: apt install golang
+
+  - name: Make Dir go
+    command: mkdir ~/go
+
+  - name: Make Dir src
+    command: mkdir ~/src
+
+  - name: Set GOPATH
+    shell: export GOPATH=$HOME/go >> ~.profile
+
+  - name: Move Files to the chatbot Dir
+    copy:
+      src: "{{item}}"
+      dest: ~/go/src/chatbot
+      mode: 0774
+    with_items:
+      ['chatbot.go','concat.go','config.json']
+
+  - name: Go Build
+    command: go build chatbot
+
+  - name: Execute bulded application
+    command: ./chatbot
