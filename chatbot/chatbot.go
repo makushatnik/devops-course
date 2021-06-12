@@ -35,12 +35,13 @@ const (
   Greetings = "Hi,\nThis bot can share with you some info about cool DevOps guy. You may find useful commands: /git, /tasks, /task1, /task2, /task3, /contacts, /cv, /paypal."
   UseLinkMsg = "To follow the link press the command"
   SupportMsg  = "Support cool DevOps guy by any amount of money:\n"
+  NoSettingsAvailableMsg = "There are no settings you can change"
 )
 
 // Errors
 const (
-  IllegalFormatErr = "Use the words for commands"
-  IllegalCommandErr = "What I can do for you?"
+  IllegalFormatErr = "Use only words for commands"
+  IllegalCommandErr = "Illegal command. Please, try again."
 )
 
 // Don't work correctly
@@ -156,6 +157,8 @@ func main() {
           sendMessage(bot, cId, getCV())
         case "/paypal":
           sendMessage(bot, cId, getPaypal())
+        case "/settings":
+          sendMessage(bot, cId, NoSettingsAvailableMsg)
         default:
           log.Println(mt)
           sendMessage(bot, cId, IllegalCommandErr)
