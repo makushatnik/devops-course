@@ -45,3 +45,13 @@ I learned more about some existing IDE, I found out that PyCharm is more appropr
 I learned a brew package manager more, tried to use it with many different options, found the ones that work better.  
 I learned an `ln -sf` command.  
 I also learned how to set a ***$PATH*** variable in different ways.
+***
+### 11/06/2021
+I learned how to create a Telegram's bot. After that I learned how to write an application for this bot on the Go language.  
+I spent all day long to understand the basics of the Go.  
+I learned how to add reviewers on my Github repo.
+***
+### 12/06/2021
+I've finally found 1 unstopped database instance on my AWS account and stopped it.  
+I setted some additional commands to my bot and checked how it works. It works on my home Linux machine. Now I think about deploy it somewhere..  
+I learned how to run a shell commands on remote hosts using Ansible.
