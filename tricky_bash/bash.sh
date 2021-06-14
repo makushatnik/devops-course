@@ -1,3 +1,0 @@
-# Created by Evgeny Ageev
-#
-# This bash is created for hard evaluations...
