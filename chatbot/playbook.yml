@@ -1,0 +1,52 @@
+---
+- name: Deploy Telegram's Bot Application to AWS
+  hosts: aws-server
+
+  vars:
+    home: /home/ec2-user
+
+  tasks:
+  - name: Install Go
+    yum:  name=golang state=latest
+    become: yes
+
+  - name: Make Project Dir
+    file:
+      path: "{{home}}/go/src/chatbot"
+      state: directory
+
+  - name: Make Dir for builded files
+    file:
+      path: "{{home}}/go/bin"
+      state: directory
+
+  - name: Set GOPATH
+    lineinfile:
+      path: "{{home}}/.bash_profile"
+      state: present
+      line: export GOPATH="{{home}}/go"
+
+  - name: Move Files to the chatbot Dir
+    copy:
+      src: "{{item}}"
+      dest: "{{home}}/go/src/chatbot"
+      mode: 0774
+    with_items:
+      ['chatbot.go','concat.go','config.json']
+
+  - name: Download Telegram library
+    command: go get github.com/Syfaro/telegram-bot-api
+
+  - name: Go Build
+    command: go build chatbot
+
+  - name: Chatbot stat
+    stat: path="{{home}}/chatbot"
+    register: bot_stat
+
+  - name: Move builded Chatbot file to a bin Dir
+    command: mv "{{home}}/chatbot" "{{home}}/go/bin/chatbot"
+    when: bot_stat.stat.exists
+
+  - name: Execute bulded application
+    command: "{{home}}/go/bin/chatbot"
