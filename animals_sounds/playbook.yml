@@ -1,0 +1,39 @@
+---
+- name: Deploy Animal's Sounds Application to AWS
+  hosts: aws-server
+
+  vars:
+    home: /home/ec2-user
+
+  tasks:
+  - name: Installing Python3 Virtual Environment library
+    yum:  name=python3-venv state=latest
+    become: yes
+
+  - name: Make Project Dir
+    file:
+      path: "{{home}}/flask-app"
+      state: directory
+
+  - name: Create Venv in the Project Dir
+    command: cd "{{home}}/flask-app" && python3 -m venv venv
+
+  - name: Move Source Files to server
+    copy:
+      src: "{{item}}"
+      dest: "{{home}}/flask-app"
+      mode: 0774
+    with_items:
+      ['main.py','errors.py','animal.py']
+
+  - name: Activating Virtual Environment
+    command: source "{{home}}/flask-app/venv/bin/activate"
+
+  - name: Installing Flask
+    command: pip install Flask
+
+  - name: Set a FLASK_APP global variable
+    command: export FLASK_APP=main.py
+
+  - name: Run Flask Application
+    command: flask run
