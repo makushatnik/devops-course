@@ -55,3 +55,14 @@ I learned how to add reviewers on my Github repo.
 I've finally found 1 unstopped database instance on my AWS account and stopped it.  
 I setted some additional commands to my bot and checked how it works. It works on my home Linux machine. Now I think about deploy it somewhere..  
 I learned how to run a shell commands on remote hosts using Ansible.
+***
+### 14/06/2021
+I learned how to run a script on an AWS instance and it won't be stopped within half a hour.  
+I learned how to create a Linux service and start it, add it to a system boot.  
+I was surprised to know that Cherry-pick is anti-pattern and ain't recommended for use.  
+I learned that Github allows to make squashes before merging Pull Requests.
+***
+### 15/06/2021
+I learned more about structs, maps, global variables in Go.  
+I also learned about the "log" library and how to use it.  
+I learned how to create and work with arrays in bash.
