@@ -3,31 +3,34 @@
 package main
 
 import (
-  "github.com/Syfaro/telegram-bot-api"
-  "log"
+  "github.com/go-telegram-bot-api/telegram-bot-api"
   "fmt"
-  "os"
+  "time"
+  "log"
   "strings"
   "reflect"
-  "encoding/json"
 )
 
 type Task struct {
   Name, Command, Url string
 }
 
-type Config struct {
-  token string
-  repo  string
-  debug bool
+type config struct {
+  Token string
+  Repo  string
+  Debug bool
 }
 
 // Global Variables
 var (
-  tasks []Task
-  fmtTasks string
-  config Config
-  //bot *tgbotapi.BotAPI
+  FmtTasks string
+  Bot *tgbotapi.BotAPI
+  Config config
+  Tasks = []Task{
+    {Name: "Animals Sounds", Command: "/task1", Url: "animals_sounds"},
+    {Name: "Tricky Bash", Command: "/task2", Url: "tricky_bash"},
+    {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
+  }
 )
 
 // Messages
@@ -44,90 +47,44 @@ const (
   IllegalCommandErr = "Illegal command. Please, try again."
 )
 
-// Don't work correctly
-func init() {
-  //Loading config file
-  //dir, _ := os.Getwd()
-  //fmt.Println(dir)
-  file, _ := os.Open("config.json")
-  decoder := json.NewDecoder(file)
-  config := Config{
-    token: "1871694809:AAExK_AsnvfzkEb1nG5Im2ZDGUIqwz1kxPw",
-    repo: "https://github.com/makushatnik/devops-course",
-    debug: true,
-  }
-  //config := new(Config)
-  err := decoder.Decode(&config)
-  //err := json.Unmarshall(file, &config)
-  fmt.Println("JSON = ", config)
-  if err != nil || config.token == "" {
-    log.Println("Telegram API Token is required")
-    os.Exit(1)
-  }
-  if config.repo == "" {
-    log.Println("Git Repository is required")
-    os.Exit(1)
-  }
-
-  //Creating tasks
-  tasks := []Task{
-    {Name: "Animals Sounds", Command: "/task1", Url: "animals_sounds"},
-    {Name: "Tricky Bash", Command: "/task2", Url: "tricky_bash"},
-    {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
-  }
-  _ = tasks
-}
-
 //The Program's Main Loop. 
 func main() {
-  //TODO: Remove settings in the init function.
-  config := Config{
-    token: "1871694809:AAExK_AsnvfzkEb1nG5Im2ZDGUIqwz1kxPw",
-    repo: "https://github.com/makushatnik/devops-course",
-    debug: true,
+  Config := getConfig("config.json")
+  Bot, BotErr := tgbotapi.NewBotAPI(Config.Token)
+  mainTree := concat(Config.Repo, "/tree/main/")
+  LogError(BotErr)
+  if BotErr != nil {
+    log.Panic("Not worked!")
   }
+  fmt.Println("Starting", time.Now().Unix(), time.Now(), time.Now().Weekday())
 
-  tasks := []Task{
-    {Name: "Animals Sounds", Command: "/task1", Url: "animals_sounds"},
-    {Name: "Tricky Bash", Command: "/task2", Url: "tricky_bash"},
-    {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
-  }
-
-  //Connect to the Telegram
-  bot, err := tgbotapi.NewBotAPI(config.token)
-  if err != nil {
-    log.Panic(err)
-  }
-
-  debug := config.debug
-  bot.Debug = debug
+  debug := Config.Debug
+  Bot.Debug = debug
   if debug {
-    fmt.Println(config.token)
-    log.Printf("Authorized on account %s", bot.Self.UserName)
+    fmt.Println(Config.Token)
+    log.Printf("Authorized on account %s", Bot.Self.UserName)
   }
 
-  repo := config.repo
-  //for _, tt := range tasks {
-    //fmtTasks := concat(fmtTasks, concat(concat(tt.Name," - "), concat(concat(UseLinkMsg," - "),tt.Command)))
-    //_ = fmtTasks
-  //}
-  fmtTasks := "Animal sounds. To follow the link press the command: /task1\nTricky Bash.To follow the link press the command: /task2\nChatbot. To follow the link press the command: /task3\n"
-  //if bot.Debug {
-    fmt.Println("FMT = ",fmtTasks)
+  repo := Config.Repo
+  for _, tt := range Tasks {
+    FmtTasks = concat(FmtTasks, fmt.Sprintf("%s - %s %s %s", tt.Name, UseLinkMsg, tt.Command, "\n"))
+  }
+  if Bot.Debug {
+    fmt.Println("FMT = ",FmtTasks)
     log.Println(repo)
-  //}
+  }
 
   //Set update time
   u := tgbotapi.NewUpdate(0)
   u.Timeout = 60
 
   //Get updates from bot
-  updates, err := bot.GetUpdatesChan(u)
+  updates, err := Bot.GetUpdatesChan(u)
   if err != nil {
+    LogError(err)
     log.Panic(err)
   }
 
-  mainTree := concat(repo, "/tree/main/")
   for update := range updates {
     if update.Message == nil || update.Message.Chat == nil {
       continue
@@ -140,38 +97,38 @@ func main() {
       //Run an appropriate command
       switch mt {
         case "/start":
-          sendMessage(bot, cId, Greetings)
+          sendMessage(cId, Greetings)
         case "/git":
-          sendMessage(bot, cId, repo)
+          sendMessage(cId, repo)
         case "/tasks":
-          sendMessage(bot, cId, fmtTasks)
+          sendMessage(cId, FmtTasks)
         case "/task1":
-          sendMessage(bot, cId, concat(mainTree,tasks[0].Url))
+          sendMessage(cId, concat(mainTree,Tasks[0].Url))
         case "/task2":
-          sendMessage(bot, cId, concat(mainTree,tasks[1].Url))
+          sendMessage(cId, concat(mainTree,Tasks[1].Url))
         case "/task3":
-          sendMessage(bot, cId, concat(mainTree,tasks[2].Url))
+          sendMessage(cId, concat(mainTree,Tasks[2].Url))
         case "/contacts":
-          sendMessage(bot, cId, getContacts())
+          sendMessage(cId, getContacts())
         case "/cv":
-          sendMessage(bot, cId, getCV())
+          sendMessage(cId, getCV())
         case "/paypal":
-          sendMessage(bot, cId, getPaypal())
+          sendMessage(cId, getPaypal())
         case "/settings":
-          sendMessage(bot, cId, NoSettingsAvailableMsg)
+          sendMessage(cId, NoSettingsAvailableMsg)
         default:
           log.Println(mt)
-          sendMessage(bot, cId, IllegalCommandErr)
+          sendMessage(cId, IllegalCommandErr)
       }
     } else {
       //Send a message about mistake
-      sendMessage(bot, cId, IllegalFormatErr)
+      sendMessage(cId, IllegalFormatErr)
     }
   }
 }
 
-func sendMessage(bot *tgbotapi.BotAPI, cId int64, m string) {
-  bot.Send(tgbotapi.NewMessage(cId, m))
+func sendMessage(cId int64, m string) {
+  Bot.Send(tgbotapi.NewMessage(cId, m))
 }
 
 func getContacts() string {
