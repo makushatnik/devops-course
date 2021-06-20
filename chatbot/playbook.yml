@@ -6,8 +6,14 @@
     home: /home/ec2-user
 
   tasks:
-  - name: Install Go
+  - name: Install Go on RedHat
     yum:  name=golang state=latest
+    when: ansible_os_family == "RedHat"
+    become: yes
+
+  - name: Install Go on Debian
+    apt:  name=golang state=latest
+    when: ansible_os_family == "Debian"
     become: yes
 
   - name: PID stat
@@ -20,25 +26,17 @@
     become: yes
 
   - name: Delete File with PID
-    file:
-      path: "{{home}}/save_pid.txt"
-      state: absent
+    file: path="{{home}}/save_pid.txt" state=absent
 
   - name: Make Project Dir
-    file:
-      path: "{{home}}/go/src/chatbot"
-      state: directory
+    file: path="{{home}}/go/src/chatbot" state=directory
 
   - name: Make Log Dir
-    file:
-      path: "/var/log/chatbot"
-      state: directory
+    file: path="/var/log/chatbot" state=directory
     become: yes
 
   - name: Make Dir for builded files
-    file:
-      path: "{{home}}/go/bin"
-      state: directory
+    file: path="{{home}}/go/bin" state=directory
 
   - name: Set GOPATH
     lineinfile:
