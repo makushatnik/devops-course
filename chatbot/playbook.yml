@@ -10,10 +10,30 @@
     yum:  name=golang state=latest
     become: yes
 
+  - name: PID stat
+    stat: path="{{home}}/save_pid.txt"
+    register: pid_stat
+
+  - name: Kill existing Process
+    command: "kill -9 `cat {{home}}/save_pid.txt`"
+    when: pid_stat.stat.exists
+    become: yes
+
+  - name: Delete File with PID
+    file:
+      path: "{{home}}/save_pid.txt"
+      state: absent
+
   - name: Make Project Dir
     file:
       path: "{{home}}/go/src/chatbot"
       state: directory
+
+  - name: Make Log Dir
+    file:
+      path: "/var/log/chatbot"
+      state: directory
+    become: yes
 
   - name: Make Dir for builded files
     file:
@@ -26,16 +46,24 @@
       state: present
       line: export GOPATH="{{home}}/go"
 
-  - name: Move Files to the chatbot Dir
+  - name: Move Source Files to the project Dir
     copy:
       src: "{{item}}"
       dest: "{{home}}/go/src/chatbot"
       mode: 0774
     with_items:
-      ['chatbot.go','concat.go','config.json']
+      ['chatbot.go','concat.go','config.go','logger.go']
+
+  - name: Move Config to the bin Dir
+    copy:
+      src: "{{item}}"
+      dest: "{{home}}/go/bin"
+      mode: 0755
+    with_items:
+      ['config.json']
 
   - name: Download Telegram library
-    command: go get github.com/Syfaro/telegram-bot-api
+    command: go get github.com/go-telegram-bot-api/telegram-bot-api
 
   - name: Go Build
     command: go build chatbot
@@ -49,4 +77,8 @@
     when: bot_stat.stat.exists
 
   - name: Execute bulded application
-    command: "{{home}}/go/bin/chatbot"
+    shell: "nohup {{home}}/go/bin/chatbot &"
+    become: yes
+
+  - name: Print the PID
+    command: "echo $! > {{home}}/save_pid.txt"

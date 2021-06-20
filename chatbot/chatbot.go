@@ -1,4 +1,4 @@
-// Telegram's ChatBot v1.0 created by Evgeny Ageev
+// Telegram's ChatBot v1.1 created by Evgeny Ageev
 
 package main
 
@@ -16,20 +16,24 @@ type Task struct {
 }
 
 type config struct {
-  Token string
-  Repo  string
-  Debug bool
+  Token  string
+  Repo   string
+  Cv     string
+  Skype  string
+  Email  string
+  Debug  bool
 }
 
 // Global Variables
 var (
   FmtTasks string
-  Bot *tgbotapi.BotAPI
-  Config config
+  Config = getConfig("config.json")
+  Bot, BotErr = tgbotapi.NewBotAPI(Config.Token)
   Tasks = []Task{
     {Name: "Animals Sounds", Command: "/task1", Url: "animals_sounds"},
     {Name: "Tricky Bash", Command: "/task2", Url: "tricky_bash"},
     {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
+    {Name: "Docker", Command: "/task4", Url: "docker"},
   }
 )
 
@@ -49,12 +53,9 @@ const (
 
 //The Program's Main Loop. 
 func main() {
-  Config := getConfig("config.json")
-  Bot, BotErr := tgbotapi.NewBotAPI(Config.Token)
-  mainTree := concat(Config.Repo, "/tree/main/")
   LogError(BotErr)
   if BotErr != nil {
-    log.Panic("Not worked!")
+    log.Panic("Telegram API aint worked!")
   }
   fmt.Println("Starting", time.Now().Unix(), time.Now(), time.Now().Weekday())
 
@@ -65,9 +66,14 @@ func main() {
     log.Printf("Authorized on account %s", Bot.Self.UserName)
   }
 
-  repo := Config.Repo
+  // Preparing variables, because it is expensive to get data in the loop
+  repo   := Config.Repo
+  cv     := Config.Cv
+  paypal := Config.Email
+  contacts := fmt.Sprintf("Skype: %s\nEmail: %s", Config.Skype, Config.Email)
+  mainTree := concat(Config.Repo, "/tree/main/")
   for _, tt := range Tasks {
-    FmtTasks = concat(FmtTasks, fmt.Sprintf("%s - %s %s %s", tt.Name, UseLinkMsg, tt.Command, "\n"))
+    FmtTasks = concat(FmtTasks, fmt.Sprintf("%s - %s %s \n", tt.Name, UseLinkMsg, tt.Command))
   }
   if Bot.Debug {
     fmt.Println("FMT = ",FmtTasks)
@@ -80,8 +86,8 @@ func main() {
 
   //Get updates from bot
   updates, err := Bot.GetUpdatesChan(u)
+  LogError(err)
   if err != nil {
-    LogError(err)
     log.Panic(err)
   }
 
@@ -90,8 +96,11 @@ func main() {
       continue
     }
 
-    mt := update.Message.Text
+    mt  := update.Message.Text
     cId := update.Message.Chat.ID
+    if debug {
+      fmt.Println("CID = ", cId)
+    }
     if reflect.TypeOf(mt).Kind() == reflect.String && mt != "" {
       mt := strings.ToLower(mt)
       //Run an appropriate command
@@ -108,12 +117,14 @@ func main() {
           sendMessage(cId, concat(mainTree,Tasks[1].Url))
         case "/task3":
           sendMessage(cId, concat(mainTree,Tasks[2].Url))
+        case "/task4":
+          sendMessage(cId, concat(mainTree,Tasks[3].Url))
         case "/contacts":
-          sendMessage(cId, getContacts())
+          sendMessage(cId, contacts)
         case "/cv":
-          sendMessage(cId, getCV())
+          sendMessage(cId, cv)
         case "/paypal":
-          sendMessage(cId, getPaypal())
+          sendMessage(cId, getPaypal(paypal))
         case "/settings":
           sendMessage(cId, NoSettingsAvailableMsg)
         default:
@@ -121,7 +132,8 @@ func main() {
           sendMessage(cId, IllegalCommandErr)
       }
     } else {
-      //Send a message about mistake
+      //Send a message about sending a photo or something other than a text message
+      //Which is mistake
       sendMessage(cId, IllegalFormatErr)
     }
   }
@@ -131,14 +143,7 @@ func sendMessage(cId int64, m string) {
   Bot.Send(tgbotapi.NewMessage(cId, m))
 }
 
-func getContacts() string {
-  return "Skype: eageev.javaee\nmakushatnik@gmail.com"
+func getPaypal(paypal string) string {
+  return concat(SupportMsg, paypal)
 }
 
-func getPaypal() string {
-  return concat(SupportMsg, "makushatnik@gmail.com")
-}
-
-func getCV() string {
-  return "https://hh.ru/resume/5b218a75ff08efcf9b0039ed1f544e75534a6c"
-}

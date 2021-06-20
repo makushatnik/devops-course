@@ -1,7 +1,6 @@
 package main
 
 import (
-  "fmt"
   "os"
   "log"
   "io/ioutil"
@@ -11,20 +10,20 @@ import (
 func getConfig(path string) config {
   Config := config{}
   file, fileErr := os.Open(path)
+  LogError(fileErr)
   if fileErr != nil {
-    LogError(fileErr)
     log.Panic("File absent")
     os.Exit(1)
   }
   data, dataErr := ioutil.ReadAll(file)
+  LogError(dataErr)
   if dataErr != nil {
-    LogError(dataErr)
     log.Panic("Can't read config's data")
     os.Exit(1)
   }
   err := json.Unmarshal(data, &Config)
+  LogError(err)
   if err != nil || Config.Token == "" {
-    LogError(err)
     log.Panic("Telegram API Token is required")
     os.Exit(1)
   }
