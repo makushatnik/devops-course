@@ -1,5 +1,7 @@
 # The Telegram's Chat Bot task
 
+The Bot created on the **Go** language & **Telegram API**.  
+
 Bot exists in Telegram under the ***[@MakushatnikBot](https://t.me/MakushatnikBot)*** nickname.  
 It understands few commands:  
 * /repo		- Returns the link to my Github repository.
@@ -7,10 +9,11 @@ It understands few commands:
 * /task1	- Returns a link to the solution of the Animal's Sounds task.
 * /task2	- Returns a link to the solution of the Tricky Bash task.
 * /task3	- Returns a link to the solution of the Chatbot task.
+* /task4    - Returns a link to the solution of the Docker task.
 * /contacts	- Returns my actual contacts.
 * /cv		- Returns an url-address to my cv.
 * /paypal	- Returns my Paypal account.
-* /settings	- Don't do anything.
+* /settings	- Doesn't do anything.
 
 It doesn't matter whether command was written in the lower or upper case.  
 Bot won't be able to get anything but words.
@@ -32,5 +35,8 @@ git clone git@github.com:makushatnik/devops-course.git devops && cd ./devops/cha
 ### Running
 Create hosts.txt file:  
 `nano hosts.txt`  
-Add your Cloud instance's settings here: **IP-address**, alias for that server, path to **SSH** key.  
+Add your Cloud instance's settings in the the hosts.txt file: **IP-address**, alias for that server, path to **SSH** key.  
 `ansible-playbook playbook.yml`
+
+### Further development:
+Force Chatbot to run as a Service.
