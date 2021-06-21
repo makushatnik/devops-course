@@ -1,0 +1,22 @@
+[Unit]
+Description=Animals Sounds
+Requires=nginx.service
+After=nginx.service
+
+[Service]
+ExecStart=/var/www/animals/app.py
+Type=idle
+
+SyslogIdentifier=animals
+SyslogFacility=daemon
+
+User=root
+Group=root
+
+RestartSec=15
+TimeoutSec=600
+StartLimitBurst=2
+StartLimitIntervalSec=30
+
+[Install]
+WantedBy=multi-user.target
