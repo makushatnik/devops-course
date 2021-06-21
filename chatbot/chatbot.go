@@ -34,6 +34,7 @@ var (
     {Name: "Tricky Bash", Command: "/task2", Url: "tricky_bash"},
     {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
     {Name: "Docker", Command: "/task4", Url: "docker"},
+    {Name: "Terraform", Command: "/task5", Url: "terraform"},
   }
 )
 
@@ -119,6 +120,8 @@ func main() {
           sendMessage(cId, concat(mainTree,Tasks[2].Url))
         case "/task4":
           sendMessage(cId, concat(mainTree,Tasks[3].Url))
+        case "/task5":
+          sendMessage(cId, concat(mainTree,Tasks[4].Url))
         case "/contacts":
           sendMessage(cId, contacts)
         case "/cv":
