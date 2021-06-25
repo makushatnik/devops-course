@@ -63,6 +63,47 @@ I was surprised to know that Cherry-pick is anti-pattern and ain't recommended f
 I learned that Github allows to make squashes before merging Pull Requests.
 ***
 ### 15/06/2021
-I learned more about structs, maps, global variables in Go.  
+I learned more about structs, maps, global variables in the Go.  
 I also learned about the "log" library and how to use it.  
 I learned how to create and work with arrays in bash.
+***
+### 16/06/2021
+I learned some new information about Docker containers, Docker Compose, Docker Swarm.
+***
+### 17/06/2021
+I learned a lot about **Nginx** configs, how to set them up.  
+I was doing hell of work researching the **Let's Encrypt SSL** configs.
+***
+### 18/06/2021
+Finally I was properly setted my **SSL** certificates, those I created by an OpenSSL, I made traffic redirection from **HTTP** (:80) to **HTTPS** (:443) ports.  
+I added some security instructions in my Ansible playbook. 
+***
+### 21/06/2021
+I learned that there was a flood in the Crimea on June 18th.  
+I learned some information about AWS CloudFormation, Azure Resource Manager, Google Cloud Deployment Manager.
+***
+### 22/06/2021
+I moved one lightweighted application located in the Docker's container from one server to another, I've added some AWS Security Rules.  
+I was reading about few Ruby's instructions and had got the RubyMine IDE installed.  
+I learned how to deal with **Ansible Vault** and had my Chatbot's (TASK-03) config encrypted.
+***
+### 23/06/2021
+I learned much about AWS hard disks & AMI images, S3 Buckets.  
+I learned some new Terraform basics & essentials.  
+I was writing a Terraform AWS configuration:
+* Autoscaling group with 2 servers
+* Config of both servers
+* Application Load Balancer
+* S3 Bucket
+
+I had done all from the Terraform homework's scheme but AWS IAM. Until I figured out what to use it for.
+***
+### 24/06/2021
+I learned that get Python and its libraries (pip, venv, etc.) installed isn't simple in a Docker container and leads to a huge size of container, even one based on Alpine Linux.  
+I started to write my 1st Docker container needed for a real purpose, the one I need to have OpenSSL + Rbenv + Ruby onboard.  
+I writed my 2nd Docker container based on a slim version of Debian Linux, with only Python, copying some sources in it.
+***
+### 25/06/2021
+I learned how to make the smallest possible Docker container in a few ways.  
+I made a Docker container with compiling sources of OpenSSL, installing Rbenv, Ruby, Chef. Which was a lot of work to do.  
+I learned how to search in files' contents using specific file extension by `grep` command.
