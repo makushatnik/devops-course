@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 set -o errexit
 set -o nounset
@@ -10,28 +10,35 @@ NETSTAT_LINUX_COMMAND=${NETSTAT_LINUX_COMMAND:-"netstat -tunapl"}
 NETSTAT_MAC_COMMAND=${NETSTAT_MAC_COMMAND:-"netstat -tunal"}
 PID=""
 PNAME=""
-GET_INFO=${GET_INFO:-"^Organization|organisation|org-name|person|descr"}
+REQ_STR=${REQ_STR:-"^Organization|organization|org-name|person|descr"}
 STATE=${STATE:-ESTABLISHED}
 
 ARGS=("$*")
 
 RED="\e[91m"
 GREEN="\e[32m"
+YELLOW="\e[33m"
 ENDCOLOR="\e[0m"
+
+# Constants
+readonly cant_execute_msg="${RED}Can't execute the script${ENDCOLOR}"
+readonly net_tools_absent_err="You need to get ${RED}net-tools${ENDCOLOR} package installed"
 
 show_usage_info() {
     # Display Help
     echo "-------------------------------------------------"
-    echo "This shell script display info about connections:"
-    echo "count, ip address, info "
+    echo "This shell script displays some info about connections:"
+    echo "count, IP address, company info "
     echo "Output is ordered by count of connections"
     echo "-------------------------------------------------"
-    echo "Syntax:"
-    echo "$(basename "${BASH_SOURCE[0]}") [-p PID] - get information by process pid"
-    echo "$(basename "${BASH_SOURCE[0]}") [-n NAME] - get information by process name"
-    echo "$(basename "${BASH_SOURCE[0]}") [-c NUMBER] - limit output information"
-    echo "$(basename "${BASH_SOURCE[0]}") [-s STATE] - show only with this state"
-    echo "$(basename "${BASH_SOURCE[0]}") [-r GET_INFO] - get this info from whois"
+    echo "Usage: solution.sh [OPTIONS]"
+    echo " "
+    echo "Options:"
+    echo "$(basename "${BASH_SOURCE[0]}") [-p PID]       get information by process PID"
+    echo "$(basename "${BASH_SOURCE[0]}") [-n NAME]      get information by process name"
+    echo "$(basename "${BASH_SOURCE[0]}") [-c NUMBER]    limit output information"
+    echo "$(basename "${BASH_SOURCE[0]}") [-s STATE]     show connections only in that state"
+    echo "$(basename "${BASH_SOURCE[0]}") [-r REQ_STR]   get requested information from Whois"
     echo 
     echo -e "${GREEN}Usage example:${ENDCOLOR}"
     echo -e "${GREEN}Get info about Organization for process with name firefox and limit output to 6 line${ENDCOLOR}"
@@ -43,46 +50,42 @@ show_usage_info() {
 check_sudo() {
 
     if [[ $EUID -ne 0 ]]; then
-        echo -e "${RED}Please run this script with sudo${ENDCOLOR}"
-        echo -e "Without sudo it will not give all information"
+        echo -e "${YELLOW}WARNING: Please, run this script with sudo${ENDCOLOR}"
+        echo -e "Without sudo it won't give all the information"
         echo -e "Example:"
         echo -e "${GREEN}sudo $(basename "${BASH_SOURCE[0]}") ${ARGS[0]} ${ENDCOLOR}"
     fi
 }
 
 check_requirements() {
-# Just check if netstat and whois is installed on system
+# Check if netstat and whois are installed.
     if [[ -z "$(which netstat)" ]]; then
-        echo -e "${RED}Cannot execute the script${ENDCOLOR}"
-        echo -e "Please ensure what you have package ${RED}net-tools${ENDCOLOR} installed"
-        echo -e "Please read https://www.tecmint.com/install-netstat-in-linux/"
+        echo -e $cant_execute_msg
+        echo -e $net_tools_absent_err
+        echo -e "Please, read https://www.tecmint.com/install-netstat-in-linux/"
         exit 1
     fi
 
     if [[ -z "$(which whois)" ]]; then
-        echo -e "${RED}Cannot execute the script${ENDCOLOR}"
-        echo -e "Please ensure what you have package net-tools installed"
+        echo -e $cant_execute_msg
+        echo -e $net_tools_absent_err
         echo -e "Please read https://www.howtogeek.com/680086/how-to-use-the-whois-command-on-linux/"
         exit 1
     fi
 }
 
-check_os() {
-# Check OS to understing that we run in Linux
-# because MacOS netstat don't show procces name if by -p paramaters
+check_os_is_linux() {
+# MacOS netstat don't show procces name if by -p parameters
 # if it's MacOS exit with message
     unameOut="$(uname -s)"
     case "${unameOut}" in
-        Linux*)     true;; #Nothing to do - Linux it's exactly what we need
-        Darwin*)    echo -e "This program correctly run only under Linux, your OS is ${unameOut}"
-                    exit 1
-                    ;;
-        *)          echo -e "This program correctly run only under Linux, your OS is ${unameOut}"
+        Linux*)     true;;
+        *)          echo -e "This shell script correctly runs only under Linux, your OS is ${unameOut}"
                     exit 1
     esac
 }
 
-get_ip_list(){
+get_ip_list() {
     local PID_PNAME="$1"
     local FULL_IP_LIST
 
@@ -90,7 +93,7 @@ get_ip_list(){
     FULL_IP_LIST="$(echo "$ALL_CONNECTIONS" | grep $STATE | awk '/'"$PID_PNAME"/' {print $5}' | cut -d: -f1 )"
 
     if [ -z "${FULL_IP_LIST}" ]; then
-        echo -e "${RED}Coul'd not find any connections with this parameters. Please check it.${ENDCOLOR}"
+        echo -e "${RED}Can't find any connections with this parameters.${ENDCOLOR}"
         exit 0;
     fi
     CONN_INFO="$(echo "$FULL_IP_LIST" | cut -d: -f1 | sort | uniq -c | sort | tail -n$COUNT_LINES)"
@@ -105,7 +108,7 @@ check_whois_by_ip() {
     do
         IP=$(echo $line | awk '{print $2}');
         CONN_COUNT=$(echo $line | awk '{print $1}');
-        ORG_NAME=$(whois $IP | awk -F':' '/'"$GET_INFO"/' {print $2}');
+        ORG_NAME=$(whois $IP | awk -F':' '/'"$REQ_STR"/' {print $2}');
 
         echo -e "$CONN_COUNT" ":" "$IP" ":" $ORG_NAME
         
@@ -114,7 +117,7 @@ check_whois_by_ip() {
 }
 
 ### Main section
-check_os
+check_os_is_linux
 check_sudo
 check_requirements
 
@@ -124,9 +127,10 @@ do
         p) PID=${OPTARG};;
         n) PNAME=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]');;
         c) COUNT_LINES=${OPTARG};;
-        r) GET_INFO=${OPTARG};;
+        r) REQ_STR=${OPTARG};;
         s) STATE=$(echo "${OPTARG}" | tr '[:lower:]' '[:upper:]');;
-        *) echo "Exit without parameters. Please see example of usage"
+        *) echo "Illegal parameter."
+           show_usage_info
            exit 0
            ;;
 
@@ -135,16 +139,15 @@ done
 
 if [ $OPTIND -eq 1 ]; then
     show_usage_info
-    echo -e "${RED}No options were passed. Please see example of usage${ENDCOLOR}";
+    echo -e "${RED}No options were passed. Please, see example of usage${ENDCOLOR}";
     exit 0;
     fi
 shift $((OPTIND-1))
 
-
 echo -e "----------------------------------"
 echo -e "Running with following parameters:"
 echo -e "----------------------------------"
-echo -e "Get the next info from whois by regexp: ${GREEN}${GET_INFO}${ENDCOLOR}"
+echo -e "Get the next info from whois by regexp: ${GREEN}${REQ_STR}${ENDCOLOR}"
 echo -e "Output lines limit is: ${GREEN}${COUNT_LINES}${ENDCOLOR}"
 echo -e "State connection is: ${GREEN}${STATE}${ENDCOLOR}"
 
@@ -155,7 +158,7 @@ elif [[ -n "${PNAME}" ]]; then
     echo -e "Information for process name: ${GREEN}${PNAME}${ENDCOLOR}"
     get_ip_list "$PNAME"
 else
-    echo -e "${RED}Plese give PID or Name to get info${ENDCOLOR}"
+    echo -e "${RED}Please, either input PID or Name to get info${ENDCOLOR}"
     exit 0;
 fi
 
