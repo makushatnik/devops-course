@@ -1,0 +1,21 @@
+[Unit]
+Description=Telegram Chatbot
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/chatbot/chatbot
+Type=idle
+
+SyslogIdentifier=chatbot
+SyslogFacility=daemon
+
+User=root
+Group=root
+
+RestartSec=15
+TimeoutSec=600
+StartLimitBurst=2
+StartLimitIntervalSec=30
+
+[Install]
+WantedBy=multi-user.target
