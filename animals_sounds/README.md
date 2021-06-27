@@ -8,7 +8,7 @@ Technologies I used:
 * OpenSSL
 
 ***
-After the service is created and started, it works on the port **80**.  
+After the service is created and started, it works on the port **80** with redirection to the **443** port.  
 Just to get predictable answer you have to ensure that the header `Content-Type: application/json` is sent.  
 If you're using **Postman**, you should go to the **Body** tab, press **Raw**, select **Json** in the drop-down list.  
 Otherwise, if you're using **Curl** try something like this:
@@ -20,24 +20,19 @@ Every JSON should contain 3 parts:
 3. The number of times it sounded it
 ***
 
+## Preparing
 Before you run an Ansible playbook, you need to create:
 1. **hosts.txt** file with servers available to you,
 2. **.vault_pass** file to be able to run an Ansible script.
 
+That very file must contain:
+6a79f43c43815a718c69a4fad17af0891cbdd9a4
 
-You need to run commands:
-sudo apt install python3-venv
-
-python3 -m venv venv
-source venv/bin/activate
-
-pip install Flask
-
-export FLASK_APP=hello.py
-flask run
-
-deactivate
+## Ansible
+After that you can run Ansible script:
+`ansible-playbook playbook.yml --vault-password-file=.vault_pass`
 
 ### Further development:
-Check that Application works as a service.
-Find out a standart to deploy.
+Check that Application works as a service.  
+Check that POST requests redirected to HTTPS correctly.  
+Animal object serialization.

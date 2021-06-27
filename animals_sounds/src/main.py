@@ -2,15 +2,13 @@
 
 from errors import error_response, bad_request
 from flask import Flask, request, jsonify
-from animal import Animal
 import random
 
 app = Flask(__name__)
 
 # Global Variables.
 username = 'Evgeny Ageev'
-inspiration = 'Made with inspiration by '
-emoji = ['😉','😊','😃','😄','😁','😆','😅','😂', '😜','😝','😎']
+emoji = ['😉','😊','😃','😄','😁','😆','😅','😂', '😜','😝','😎','❤']
 
 # Constants.
 SOMETHING_WENT_WRONG = 'Something went wrong';
@@ -36,8 +34,8 @@ def json_example():
       ri = random.randint(0, len(emoji) - 1)
       for _ in range(count):
         resp_str += animal + ' sounds ' + sound + " \n"
-      resp_str += inspiration + username + ' ' + emoji[ri] + "\n"
-      return resp_str
+
+      return '{}Made with {} by {}'.format(resp_str, emoji[ri], username)
   return 'Send correct JSON, please\n', 400
 
 # Error handler for 500 status code.

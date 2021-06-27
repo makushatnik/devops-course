@@ -4,7 +4,10 @@ Requires=nginx.service
 After=nginx.service
 
 [Service]
-ExecStart=/var/www/animals/app.py
+WorkingDirectory={{ flaskDir }}
+ExecStart={{ flaskDir }}/venv/bin/python {{ flaskDir }}/main.py
+ExecStop=/bin/bash echo 'Falling'
+KillMode=process
 Type=idle
 
 SyslogIdentifier=animals
@@ -17,6 +20,7 @@ RestartSec=15
 TimeoutSec=600
 StartLimitBurst=2
 StartLimitIntervalSec=30
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target

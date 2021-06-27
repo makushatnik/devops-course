@@ -1,0 +1,22 @@
+---
+- name: Install UFW on RedHat
+  yum: name=ufw state=latest
+  when: ansible_os_family == "RedHat"
+
+- name: Install UFW on Debian
+  apt: name=ufw state=latest
+  when: ansible_os_family == "Debian"
+
+- ufw: state=enabled policy=deny
+
+- ufw: logging=on
+
+- ufw: rule=reject port=auth log=yes
+
+- ufw: rule=limit port=ssh proto=tcp
+
+- ufw: rule=allow name=OpenSSH
+
+- ufw: rule=allow port=80 proto=tcp
+
+- ufw: rule=allow port=443 proto=tcp

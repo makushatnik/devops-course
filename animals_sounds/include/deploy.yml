@@ -1,0 +1,45 @@
+---
+- name: Installing Python3 on RedHat
+  yum:  name=python3 state=latest
+  when: ansible_os_family == "RedHat"
+
+- name: Installing Python3 on Debian
+  apt:  name=python3 state=latest
+  when: ansible_os_family == "Debian"
+
+- name: Add VENV global variable
+  lineinfile:
+    path: "{{home}}/.bash_profile"
+    line: export VIRTUAL_ENV="{{flaskDir}}/venv"
+    state: present
+
+- name: Make Project Dir
+  file: path="{{flaskDir}}" state=directory
+
+- name: Venv Dir stat
+  stat: path="{{flaskDir}}/venv"
+  register: venv_stat
+
+- name: Create Venv in the Project Dir
+  command: "python3 -m venv {{flaskDir}}/venv"
+  when: not venv_stat.stat.exists
+
+- name: Add VENV to the PATH
+  lineinfile:
+    path: "{{home}}/.bash_profile"
+    line: export PATH="$VIRTUAL_ENV/bin:$PATH"
+    state: present
+
+- name: Move Source Files to server
+  copy:
+    src: "{{item}}"
+    dest: "{{flaskDir}}"
+    mode: 0774
+  with_items:
+    ['src/main.py','src/errors.py','requirements.txt']
+
+- name: Installing Pip packages
+  pip:
+    virtualenv: "{{flaskDir}}/venv"
+    requirements: "{{flaskDir}}/requirements.txt"
+
