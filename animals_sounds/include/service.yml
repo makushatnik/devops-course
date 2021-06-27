@@ -1,0 +1,11 @@
+---
+- name: Create flaskapp systemd service file
+  template:
+    src: service/animals.j2
+    dest: /etc/systemd/system/animals.service
+    owner: root
+    group: root
+    force: yes
+  notify:
+    - Start App
+

@@ -1,4 +1,5 @@
 # DTO class for animals.
+# Used for serializing / deserialing data from (to) JSON.
 
 class Animal():
 

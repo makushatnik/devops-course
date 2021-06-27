@@ -1,0 +1,27 @@
+---
+- name: Disable root login
+  lineinfile:
+    path: /etc/passwd
+    state: present
+    line: root:x:0:0:root:/root:/sbin/nologin
+
+- name: Disable root login 2
+  lineinfile:
+    path: /etc/passwd
+    state: absent
+    line: root:x:0:0:root:/root:/bin/bash
+
+- name: Disable password login
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    line: PasswordAuthentication no
+  notify: Restart Sshd
+
+- name: Disable password login 2
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: absent
+    line: PasswordAuthentication yes
+  notify: Restart Sshd
+

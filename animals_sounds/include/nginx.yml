@@ -1,0 +1,50 @@
+---
+- name: Install Nginx on RedHat
+  yum: name=nginx state=latest
+  when: ansible_os_family == "RedHat" and ansible_distribution != "Amazon"
+
+- name: Install Nginx on Amazon
+  command: amazon-linux-extras install nginx1
+  when: ansible_distribution == "Amazon"
+
+- name: Install Nginx on Debian
+  apt: name=nginx state=latest
+  when: ansible_os_family == "Debian"
+
+- name: Copy Nginx config
+  copy:
+    src: nginx/animals.conf
+    dest: /etc/nginx/sites-enabled
+    mode: 0755
+  notify: Reload Nginx
+
+- name: Copy Nginx snippets
+  copy:
+    src: "nginx/{{item}}"
+    dest: /etc/nginx/snippets
+    mode: 0755
+  with_items: ['self-signed.conf','ssl-params.conf']
+  notify: Reload Nginx
+
+- name: Private Dir Stat
+  stat: path=/etc/ssl/private
+  register: private_stat
+
+- name: Create Private Dir
+  file: path=/etc/ssl/private state=directory
+  when: not private_stat.stat.exists
+
+- name: Copy Private Key
+  copy:
+    src: "certs/nginx.key"
+    dest: /etc/ssl/private/nginx.key
+    mode: 0400
+  notify: Reload Nginx
+
+- name: Copy Public Key
+  copy:
+    src: "certs/nginx.crt"
+    dest: /etc/ssl/certs/nginx.crt
+    mode: 0644
+  notify: Reload Nginx
+
