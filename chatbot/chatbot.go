@@ -1,4 +1,4 @@
-// Telegram's ChatBot v1.1 created by Evgeny Ageev
+// Telegram's ChatBot v1.2 created by Evgeny Ageev
 
 package main
 

@@ -44,5 +44,9 @@ git clone git@github.com:makushatnik/devops-course.git devops && cd ./devops/cha
 5. Type command:
 `ansible-playbook playbook.yml --vault-password-file .vault-pass`
 
+### Logs
+Now it writes a log. You can see it in that very file:
+`/var/log/chatbot.log`
+
 ### Further development:
 Force Chatbot to run as a Service.
