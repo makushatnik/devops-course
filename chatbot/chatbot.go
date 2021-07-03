@@ -35,6 +35,9 @@ var (
     {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
     {Name: "Docker", Command: "/task4", Url: "docker"},
     {Name: "Terraform", Command: "/task5", Url: "terraform"},
+    {Name: "Github", Command: "/task6", Url: "github"},
+    {Name: "AWS CLI", Command: "/task7", Url: "awscli"},
+    {Name: "AWS CloudFormation", Command: "/cloudform", Url: "cloudform"},
   }
 )
 
@@ -122,6 +125,12 @@ func main() {
           sendMessage(cId, concat(mainTree,Tasks[3].Url))
         case "/task5":
           sendMessage(cId, concat(mainTree,Tasks[4].Url))
+        case "/task6":
+          sendMessage(cId, concat(mainTree,Tasks[5].Url))
+        case "/task7":
+          sendMessage(cId, concat(mainTree,Tasks[6].Url))
+        case "/cloudform":
+          sendMessage(cId, concat(mainTree,Tasks[7].Url))
         case "/contacts":
           sendMessage(cId, contacts)
         case "/cv":
