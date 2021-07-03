@@ -211,12 +211,18 @@ Resources:
     DependsOn: GatewayAttachmentInternet
     Properties:
       Domain: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "EIP-A" ] ]
 
   EIP2:
     Type: "AWS::EC2::EIP"
     DependsOn: GatewayAttachmentInternet
     Properties:
       Domain: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Join [ "-", [ !Ref Environment, "EIP-B" ] ]
 
 #========================= NAT Gateways =========================
   NATGatewayA:
@@ -227,7 +233,7 @@ Resources:
       AllocationId: !GetAtt EIP1.AllocationId
       Tags:
         - Key: Name
-          Value: NAT-A
+          Value: !Join [ "-", [ !Ref Environment, "NAT-A" ] ]
 
   NATGatewayB:
     Type: "AWS::EC2::NatGateway"
@@ -237,7 +243,7 @@ Resources:
       AllocationId: !GetAtt EIP2.AllocationId
       Tags:
         - Key: Name
-          Value: NAT-B
+          Value: !Join [ "-", [ !Ref Environment, "NAT-B" ] ]
 
 #========================== Subnets =============================
   PublicSubnetA:
@@ -246,7 +252,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [ 0, "Fn::GetAZs": { Ref: "AWS::Region" } ]
       CidrBlock: !Ref PublicSubnetACIDR
-      MapPublicIPOnLaunch: true
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: !Join [ "", [ !Ref Environment, "-Public-A" ] ]
@@ -257,7 +263,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [ 1, "Fn::GetAZs": { Ref: "AWS::Region" } ]
       CidrBlock: !Ref PublicSubnetBCIDR
-      MapPublicIPOnLaunch: true
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
           Value: !Join [ "", [ !Ref Environment, "-Public-B" ] ]
@@ -268,7 +274,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [ 0, "Fn::GetAZs": { Ref: "AWS::Region" } ]
       CidrBlock: !Ref PrivateSubnetACIDR
-      MapPublicIPOnLaunch: false
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Join [ "", [ !Ref Environment, "-Private-A" ] ]
@@ -279,7 +285,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [ 1, "Fn::GetAZs": { Ref: "AWS::Region" } ]
       CidrBlock: !Ref PrivateSubnetBCIDR
-      MapPublicIPOnLaunch: false
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Join [ "", [ !Ref Environment, "-Private-B" ] ]
@@ -290,7 +296,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [ 0, "Fn::GetAZs": { Ref: "AWS::Region" } ]
       CidrBlock: !Ref DatabaseSubnetACIDR
-      MapPublicIPOnLaunch: false
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Join [ "", [ !Ref Environment, "-Database-A" ] ]
@@ -301,7 +307,7 @@ Resources:
       VpcId: !Ref VPC
       AvailabilityZone: !Select [ 1, "Fn::GetAZs": { Ref: "AWS::Region" } ]
       CidrBlock: !Ref DatabaseSubnetBCIDR
-      MapPublicIPOnLaunch: false
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Join [ "", [ !Ref Environment, "-Database-B" ] ]
