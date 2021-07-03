@@ -37,6 +37,7 @@ var (
     {Name: "Terraform", Command: "/task5", Url: "terraform"},
     {Name: "Github", Command: "/task6", Url: "github"},
     {Name: "AWS CLI", Command: "/task7", Url: "awscli"},
+    {Name: "AWS CloudFormation", Command: "/cloudform", Url: "cloudform"},
   }
 )
 
@@ -128,6 +129,8 @@ func main() {
           sendMessage(cId, concat(mainTree,Tasks[5].Url))
         case "/task7":
           sendMessage(cId, concat(mainTree,Tasks[6].Url))
+        case "/cloudform":
+          sendMessage(cId, concat(mainTree,Tasks[7].Url))
         case "/contacts":
           sendMessage(cId, contacts)
         case "/cv":
