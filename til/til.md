@@ -107,3 +107,28 @@ I writed my 2nd Docker container based on a slim version of Debian Linux, with o
 I learned how to make the smallest possible Docker container in a few ways.  
 I made a Docker container with compiling sources of OpenSSL, installing Rbenv, Ruby, Chef. Which was a lot of work to do.  
 I learned how to search in files' contents using specific file extension by `grep` command.
+***
+### 28/06/1021
+I learned how to wear an Entrypoint above a Docker image.  
+I learned some Network Basics - about TCP, UDP, ARP protocols, work with ip, etc..
+***
+### 29/06/2021
+I learned how to mount directories into a Docker image.  
+I had read much information about AWS DMS & Redshift.
+***
+### 30/06/2021
+I learned how to use AWS CLI, Azure Powershell.  
+I have moved one step forward in Terraform.
+***
+### 01/07/2021
+I learned how to turn OVPN file into tblk (Tunnelblick).  
+I also leaned how to wear a Workdir above a Docker image.
+***
+### 02/07/2021
+I learned some information about AWS CloudFormation, Lambda, API Gateway.  
+I started to prepare to my AWS Solution Architect certification.
+***
+### 03/07/2021
+I writed my 1st CloudFormation script and ensured its running normally.  
+I learned how to write requests for **jq** package and something new about usage an AWS CLI (query & filters).  
+I writed an AWS CLI task in a Bash.
