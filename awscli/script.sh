@@ -1,8 +1,5 @@
 #!/bin/bash
-
-ARGS=("$*")
-echo "ARGS = $ARGS"
-
+ARGS=("$@")
 Intervals=('day' 'hour' 'minute'); 
 
 readonly MAX_COUNT=2000000
@@ -16,7 +13,10 @@ readonly CANT_EXECUTE_MSG="${RED}Can't execute the script${ENDCOLOR}"
 readonly EBS_LIST_COMMAND_START="aws ec2 describe-snapshots --owner self --output json | jq '.Snapshots[] |"
 readonly EBS_LIST_COMMAND_END="| [.Description, .VolumeSize, .StartTime, .SnapshotId, .Tags]'"
 # readonly DATE_CONDITION=".StartTime < $(date --date='-"$1 $2"' '+%Y-%m-%d %H:%M')"
-readonly DATE_CONDITION=".StartTime < $(date --date='-1 hour' '+%Y-%m-%d %H:%M')"
+readonly DATE_EVAL="$(date --date="-$1 $2" '+%Y-%m-%d %H:%M')"
+#echo "DATE_EVAL = $DATE_EVAL"
+#exit 1
+DATE_CONDITION=".StartTime < \"$DATE_EVAL\""
 echo "DATE_CONDITION = $DATE_CONDITION"
 readonly FILTER_CONDITION=".Tags[].Value == $3"
 
@@ -48,11 +48,11 @@ check_requirements() {
 }
 
 check_arguments() {
-  count=$1
-  interval=$2
-  if [[ -n count ]]; then
+  local count=$1
+  local interval=$2
+
+  if [[ -z count ]]; then
     echo -e $CANT_EXECUTE_MSG
-    echo "Count = $count"
     show_usage
     exit 1
   fi
@@ -69,9 +69,8 @@ check_arguments() {
     exit 1
   fi
 
-  if [[ -n interval ]]; then
+  if [[ -z interval ]]; then
     echo -e $CANT_EXECUTE_MSG
-    echo "Interval = $interval"
     show_usage
     exit 1
   fi
@@ -86,7 +85,7 @@ check_arguments() {
 
 ### Main section
 check_requirements
-check_arguments
+check_arguments ${ARGS[*]}
 
 FILTER=$3
 EBS_LIST=""
@@ -97,4 +96,6 @@ else
   EBS_LIST="$EBS_LIST_COMMAND_START select($DATE_CONDITION) $EBS_LIST_COMMAND_END"
 fi
 echo "List of EBS Snapshots found:"
-echo "$EBS_LIST"
+echo $EBS_LIST
+RUN=$(`echo $EBS_LIST`)
+echo $RUN
