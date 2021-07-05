@@ -2,26 +2,21 @@
 - name: Disable root login
   lineinfile:
     path: /etc/passwd
+    regex: "^{{item.key}}:"
+    line:  "{{item.key}}:{{item.value}}"
     state: present
-    line: root:x:0:0:root:/root:/sbin/nologin
+  with_items:
+    - { key: "root:x:0:0:root:/root", value: "/sbin/nologin"}
 
-- name: Disable root login 2
+- name: Configure Sshd
   lineinfile:
-    path: /etc/passwd
-    state: absent
-    line: root:x:0:0:root:/root:/bin/bash
-
-- name: Disable password login
-  lineinfile:
-    path: /etc/ssh/sshd_config
+    path:  /etc/ssh/sshd_config
+    regex: "^{{item.key}}"
+    line:  "{{item.key}} {{item.value}}"
     state: present
-    line: PasswordAuthentication no
+  with_items:
+    - { key: "PermitRootLogin", value: "no" }
+    - { key: "PasswordAuthentication", value: "no" }
+    - { key: "AuthenticationMethods", value: "publickey" }
+    - { key: "PubkeyAuthentication", value: "yes" }
   notify: Restart Sshd
-
-- name: Disable password login 2
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    state: absent
-    line: PasswordAuthentication yes
-  notify: Restart Sshd
-

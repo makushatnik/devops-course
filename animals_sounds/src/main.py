@@ -4,6 +4,9 @@ from errors import error_response, bad_request
 from flask import Flask, request, jsonify
 import random
 
+import jsonschema
+from jsonschema import validate
+
 app = Flask(__name__)
 
 # Global Variables.
@@ -11,32 +14,70 @@ username = 'Evgeny Ageev'
 emoji = ['😉','😊','😃','😄','😁','😆','😅','😂', '😜','😝','😎','❤']
 
 # Constants.
+ANIMALS_EMOJI_PATH = "emoji.txt"
+
 SOMETHING_WENT_WRONG = 'Something went wrong';
 PAGE_NOT_FOUND = 'Page not found';
 USER_SIDE_ERROR = 'Error on the user side';
 
+# Loading of emoji
+with open(ANIMALS_EMOJI_PATH) as file:
+    animals_emoji_source = dict(x.lower().rstrip().split(None, 1) for x in file)
+
+animals_emoji = {v: k for k, v in animals_emoji_source.items()}
+set_with_keys = set(key.lower() for key in emoji)
+
+# JSON schema for validating input data from POST request
+animalsSchema = {
+    "type": "object",
+    "properties": {
+        "animal": {"type": "string"},
+        "sound": {"type": "string"},
+        "count": {"type": "number"}
+    },
+    "required": ["animal", "sound", "count"]
+}
+
 # Monitoring for DevOps.
+# We shouldn't send an HTML as response, if we write an API.
 @app.route('/',methods=['GET'])
 def check_status():
   return 'Up and Running!'
+
+def validate_json(json_data):
+    try:
+        validate(instance=json_data, schema=animalsSchema)
+    except jsonschema.exceptions.ValidationError:
+        return False
+    return True
 
 # Posting an Animal DTO object and getting an answer.
 # TODO: change data to an Animal object.
 @app.route('/',methods=['POST'])
 def json_example():
   data = request.get_json()
-  if data:
-    if 'animal' in data and 'sound' in data and 'count' in data:
-      animal = data['animal']
-      sound = data['sound']
-      count = data['count']
-      resp_str = '';
-      ri = random.randint(0, len(emoji) - 1)
-      for _ in range(count):
-        resp_str += animal + ' sounds ' + sound + " \n"
+  is_valid = validate_json(data)
+  if is_valid:
+    return generate_response(data)
+  else:
+    app.logger.info("Invalid JSON: %s", data)
+    return 'Send correct JSON, please\n', 400
 
-      return '{}Made with {} by {}'.format(resp_str, emoji[ri], username)
-  return 'Send correct JSON, please\n', 400
+def generate_response(data):
+  animal = data['animal']
+  sound = data['sound']
+  count = data['count']
+  lowAnimal = animal.lower()
+
+  if lowAnimal in animals_emoji:
+    animal = animals_emoji[lowAnimal]
+
+  res = '';
+  ri = random.randint(0, len(emoji) - 1)
+  for _ in range(count):
+    res += animal + ' sounds ' + sound + " \n"
+
+  return '{}Made with {} by {}\n'.format(res, emoji[ri], username)
 
 # Error handler for 500 status code.
 @app.errorhandler(500)
