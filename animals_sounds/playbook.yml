@@ -11,6 +11,7 @@
   - name: Include Deploy Project source files
     include: include/deploy.yml
 
+# Ain't work on Amazon Linux
 #  - name: Include Disabling Services & Ports
 #    include: include/ufw.yml
 
@@ -38,4 +39,4 @@
       name: animals
       state: restarted
       enabled: yes
-      daemon_reload: true
+#      daemon_reload: true
