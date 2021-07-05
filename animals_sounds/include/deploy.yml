@@ -36,10 +36,12 @@
     dest: "{{flaskDir}}"
     mode: 0774
   with_items:
-    ['src/main.py','src/errors.py','requirements.txt']
+    ['src/main.py','src/errors.py','src/emoji.txt','requirements.txt']
 
 - name: Installing Pip packages
   pip:
     virtualenv: "{{flaskDir}}/venv"
     requirements: "{{flaskDir}}/requirements.txt"
 
+- name: Install Jsonschema library. (WA Until Serialization not works)
+  pip: name=jsonschema state=latest
