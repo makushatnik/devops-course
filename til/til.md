@@ -132,3 +132,15 @@ I started to prepare to my AWS Solution Architect certification.
 I writed my 1st CloudFormation script and ensured its running normally.  
 I learned how to write requests for **jq** package and something new about usage an AWS CLI (query & filters).  
 I writed an AWS CLI task in a Bash.
+***
+### 05/07/2021
+I learned that there's 2 types of VPN on the AWS, about VPC peering, Endpoints, Transit Gateways, Direct Connect, CloudFront, Route53.  
+I learned few types of routes in Route53:  
+* Geographical
+* Failover
+* Latency based
+* Weight based
+***
+### 06/07/2021
+I learned how to get a substring from a source string in a Bash.  
+I learned how to call a function with parameters in a Bash.
