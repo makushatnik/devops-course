@@ -38,9 +38,27 @@ animalsSchema = {
     "required": ["animal", "sound", "count"]
 }
 
+
+GREETING_STR = '''
+<pre>
+IIIIII    dTb.dTb        _.---._
+  II     4'  v  'B   .'"".'/|\`.""'.
+  II     6.     .P  :  .' / | \ `.  :
+  II     'T;. .;P'  '.'  /  |  \  `.'
+  II      'T; ;P'    `. /   |   \ .'
+IIIIII     'YvP'       `-.__|__.-'
+
+I love shells --egypt
+</pre>
+'''
+
 # Monitoring for DevOps.
-# We shouldn't send an HTML as response, if we write an API.
 @app.route('/',methods=['GET'])
+def greeting():
+  return GREETING_STR
+
+# Monitoring for DevOps.
+@app.route('/health',methods=['GET'])
 def check_status():
   return 'Up and Running!'
 
