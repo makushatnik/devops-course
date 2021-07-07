@@ -36,7 +36,13 @@
     dest: "{{flaskDir}}"
     mode: 0774
   with_items:
-    ['src/main.py','src/errors.py','src/emoji.txt','requirements.txt']
+    ['src/main.py','src/errors.py','requirements.txt']
+
+- name: Move Emoji File to server
+  copy:
+    src: 'src/emoji.txt'
+    dest: '/etc/systemd/system'
+    mode: 0774
 
 - name: Installing Pip packages
   pip:
@@ -45,3 +51,4 @@
 
 - name: Install Jsonschema library. (WA Until Serialization not works)
   pip: name=jsonschema state=latest
+

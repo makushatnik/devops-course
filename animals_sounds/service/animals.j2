@@ -1,11 +1,12 @@
 [Unit]
-Description=Animals Sounds
+Description=Animals_Sounds
 Requires=nginx.service
 After=nginx.service
 
 [Service]
 WorkingDirectory={{ flaskDir }}
-ExecStart={{ flaskDir }}/venv/bin/python {{ flaskDir }}/main.py
+# We have python in VIRTUAL_ENV
+ExecStart=python {{ flaskDir }}/main.py
 ExecStop=/bin/bash echo 'Falling'
 KillMode=process
 Type=idle

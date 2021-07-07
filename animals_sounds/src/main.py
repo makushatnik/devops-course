@@ -14,7 +14,7 @@ username = 'Evgeny Ageev'
 emoji = ['😉','😊','😃','😄','😁','😆','😅','😂', '😜','😝','😎','❤']
 
 # Constants.
-ANIMALS_EMOJI_PATH = "emoji.txt"
+ANIMALS_EMOJI_PATH = "/etc/systemd/system/emoji.txt"
 
 SOMETHING_WENT_WRONG = 'Something went wrong';
 PAGE_NOT_FOUND = 'Page not found';
@@ -38,9 +38,45 @@ animalsSchema = {
     "required": ["animal", "sound", "count"]
 }
 
+
+GREETING_STR = '''
+<div style="position: absolute; top: 0px; left: 0px;">
+<pre>
+IIIIII                   _.---._
+  II                 .'"".'/|\`.""'.
+  II                :  .' / | \ `.  :
+  II                '.'  /  |  \  `.'
+  II                 `. /   |   \ .'
+IIIIII                 `-.__|__.-'
+
+I love shells --egypt
+[== Inspired by Metasploit ==]
+</pre>
+</div>
+<div style="color: red; position: absolute; left: 60px; top: 0px;">
+<pre>
+  dTb.dTb  
+ 4'  v  'B 
+ 6.     .P 
+ 'T;. .;P' 
+  'T; ;P'  
+   'YvP'   
+</pre>
+</div>
+<div style="color: blue; position: absolute; top: 150px; left: 0px;">
+我要成為骯髒的富人。<br>
+Devops 技術和技能將幫助我解決這個問題。<br>
+我喜歡在遊艇上航行、直升機、徒步旅行、滑雪、旅行。
+</div>
+'''
+
 # Monitoring for DevOps.
-# We shouldn't send an HTML as response, if we write an API.
 @app.route('/',methods=['GET'])
+def greeting():
+  return GREETING_STR
+
+# Monitoring for DevOps.
+@app.route('/health',methods=['GET'])
 def check_status():
   return 'Up and Running!'
 
