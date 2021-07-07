@@ -32,7 +32,15 @@ That very file must contain:
 After that you can run Ansible script:
 `ansible-playbook playbook.yml --vault-password-file=.vault_pass`
 
+When Ansible has finished its work correctly, you've got an `animals.service` which starts only after `nginx.service`. Every command for services will work then:
+    systemctl status animals.service
+	sudo systemctl stop animal.service       **To stop**
+	sudo systemctl start animals.service     **To start**
+	sudo systemctl restart animals.service   **To restart**
+
+Also, you could see the logs of the Service like this:  
+`sudo journalctl -eu animals.service`
+
 ### Further development:
-Check that Application works as a service.  
 Check that POST requests redirected to HTTPS correctly.  
 Animal object serialization.

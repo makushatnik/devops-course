@@ -14,7 +14,7 @@ username = 'Evgeny Ageev'
 emoji = ['😉','😊','😃','😄','😁','😆','😅','😂', '😜','😝','😎','❤']
 
 # Constants.
-ANIMALS_EMOJI_PATH = "emoji.txt"
+ANIMALS_EMOJI_PATH = "/etc/systemd/system/emoji.txt"
 
 SOMETHING_WENT_WRONG = 'Something went wrong';
 PAGE_NOT_FOUND = 'Page not found';
