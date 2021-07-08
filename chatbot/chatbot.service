@@ -4,6 +4,7 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/chatbot/chatbot
+ExecStop=/bin/bash echo 'Chatbot finishing'
 Type=idle
 
 SyslogIdentifier=chatbot
