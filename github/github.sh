@@ -1,5 +1,6 @@
 #!/bin/bash
-readonly API_URL="https://api.github.com/"
+readonly GITHUB_API_URL="https://api.github.com/repos/"
+
 readonly GITHUB_URL="https://github.com/"
 readonly GITLAB_URL="https://gitlab.com/"
 readonly BITBUCKET_URL="https://bitbucket.com/"
@@ -16,37 +17,49 @@ show_usage() {
   echo "* - required parameters"
 }
 
-REPO_URL=$1
-REPO_PART=''
-if [[ $REPO_URL == *$GITHUB_URL* ]]; then
-  REPO_PART=${REPO_URL:GITHUB_LEN}
-elif [[ $REPO_URL == *$GITLAB_URL* ]]; then
-  REPO_PART=${REPO_URL:GITLAB_LEN}
-elif [[ $REPO_URL == *$BITBUCKET_URL* ]]; then
-  REPO_PART=${REPO_URL:BITBUCKET_LEN}
+if [[ $# -lt 1 ]]; then
+  show_usage
+  exit 0
+fi
+
+repo_url=$1
+repo_part=''
+get_pulls_str=''
+if [[ $repo_url == *$GITHUB_URL* ]]; then
+  is_github=true
+  repo_part=${repo_url:GITHUB_LEN}
+elif [[ "$repo_str" == *$GITLAB_URL* ]]; then
+  repo_part=${repo_url:GITLAB_LEN}
+  echo "Not supported now"
+  exit 0
+elif [[ "$repo_url" == *$BITBUCKET_URL* ]]; then
+  repo_part=${repo_url:BITBUCKET_LEN}
+  echo "Not supported now"
+  exit 0
 else
   echo "ERROR: There's no such repository"
   show_usage
   exit 1
 fi
 
-IFS='/' read -ra my_array <<< "$REPO_PART"
-REPO_OWNER=${my_array[0]}
-REPO_NAME=${my_array[1]}
-echo "REPO_OWNER = $REPO_OWNER"
-echo "REPO_OWNER = $REPO_NAME"
-
-check_arguments() {
-  echo "PARAM = $1"
-}
-# Get Pull Requests
-LIST="$(curl $API_URL$REPO_OWNER/$REPO_NAME/pulls)"
-if [[ -z $LIST[message] ]]; then
-  echo "API worked"
-else
-  echo "API don't work now. Try later."
-  exit 1
+IFS='/' read -ra my_array <<< "$repo_part"
+repo_owner=${my_array[0]}
+repo_name=${my_array[1]}
+echo "REPO_OWNER = $repo_owner"
+echo "REPO_OWNER = $repo_name"
+if [ $is_github ]; then
+  get_pulls_str="$GITHUB_API_URL$repo_owner/$repo_name/pulls"
 fi
+
+# Get Pull Requests
+list="$(curl $get_pulls_str)"
+#if [ -z "${list[message]}" ] || [ "${list[message]}" != "Not Found" ]; then
+#  echo "API worked"
+#else
+#  echo "API don't work now. Try later."
+#  exit 1
+#fi
 # Filter Participants
 
-echo "$LIST" | jq '.[] | [ .id, .number, .user.login ]'
+echo "$list" | jq '.[] | [{ id: .id, url: .url, number: .number, user: .user.login }] | group_by(.user) '
+
