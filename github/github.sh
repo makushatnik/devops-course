@@ -46,20 +46,28 @@ IFS='/' read -ra my_array <<< "$repo_part"
 repo_owner=${my_array[0]}
 repo_name=${my_array[1]}
 echo "REPO_OWNER = $repo_owner"
-echo "REPO_OWNER = $repo_name"
+echo "REPO_NAME  = $repo_name"
 if [ $is_github ]; then
   get_pulls_str="$GITHUB_API_URL$repo_owner/$repo_name/pulls"
 fi
 
-# Get Pull Requests
-list="$(curl $get_pulls_str)"
 #if [ -z "${list[message]}" ] || [ "${list[message]}" != "Not Found" ]; then
 #  echo "API worked"
 #else
 #  echo "API don't work now. Try later."
 #  exit 1
 #fi
-# Filter Participants
 
-echo "$list" | jq '.[] | [{ id: .id, url: .url, number: .number, user: .user.login }] | group_by(.user) '
+# 1.1 Check that Pull Requests in open State exist
+list="$(curl $get_pulls_str)"
+open_pulls_count=`echo "$list" | jq '[.[] | select(.state == "open") |{ id: .id, state: .state}] |group_by(.state)|.[]|([.[]]|length)'`
+#echo "OPEN PR = $open_pulls_count"
+if [[ $open_pulls_count -gt 0 ]]; then
+  echo "There are $open_pulls_count of open Pull Requests"
+else
+  echo "There no open Pull Requests"
+fi
+
+# 1.2 Get the most Active Participants
+echo "$list" | jq '[.[] | { id: .id, url: .url, number: .number, user: .user.login } ] | group_by(.user)|.[]|{user: .[0].user, count: ([.[]]|length)} | select(.count >= 2) | .user'
 
