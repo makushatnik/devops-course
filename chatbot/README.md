@@ -4,17 +4,20 @@ The Bot created on the **Go** language & **Telegram API**.
 
 Bot exists in Telegram under the ***[@MakushatnikBot](https://t.me/MakushatnikBot)*** nickname.  
 It understands few commands:  
-* /repo		- Returns the link to my Github repository.
-* /tasks	- Returns a list of tasks.
-* /task1	- Returns a link to the solution of the Animal's Sounds task.
-* /task2	- Returns a link to the solution of the Tricky Bash task.
-* /task3	- Returns a link to the solution of the Chatbot task.
-* /task4    - Returns a link to the solution of the Docker task.
-* /task5    - Returns a link to the solution of the Terraform task.
-* /contacts	- Returns my actual contacts.
-* /cv		- Returns an url-address to my CV.
-* /paypal	- Returns my Paypal account.
-* /settings	- Doesn't do anything.
+* /repo		 - Returns the link to my Github repository.
+* /tasks	 - Returns a list of tasks.
+* /task1	 - Returns a link to the solution of the Animal's Sounds task.
+* /task2	 - Returns a link to the solution of the Tricky Bash task.
+* /task3	 - Returns a link to the solution of the Chatbot task.
+* /task4     - Returns a link to the solution of the Docker task.
+* /task5     - Returns a link to the solution of the Terraform task.
+* /task6     - Returns a link to the solution of the Github task.
+* /task7     - Returns a link to the solution of the AWS CLI task.
+* /cloudform - Returns a link to an AWS CloudFormation case.
+* /contacts	 - Returns my actual contacts.
+* /cv		 - Returns an url-address to my CV.
+* /paypal	 - Returns my Paypal account.
+* /settings	 - Doesn't do anything.
 
 It doesn't matter whether command was written in the lower or upper case.  
 Bot won't be able to get anything but words.
@@ -44,9 +47,8 @@ git clone git@github.com:makushatnik/devops-course.git devops && cd ./devops/cha
 5. Type command:
 `ansible-playbook playbook.yml --vault-password-file .vault-pass`
 
-### Logs
-Now it writes a log. You can see it in that very file:
-`/var/log/chatbot.log`
+When all steps will be done, chatbot starts as a Linux Service.
 
-### Further development:
-Force Chatbot to run as a Service.
+### Logs
+Application writes a log. You can see it in that very file:
+`/var/log/chatbot.log`
