@@ -13,11 +13,10 @@ readonly CANT_EXECUTE_MSG="${RED}Can't execute the script${ENDCOLOR}"
 readonly EBS_LIST_COMMAND_START="aws ec2 describe-snapshots --owner self --output json | jq '.Snapshots[] |"
 readonly EBS_LIST_COMMAND_END="| [.Description, .VolumeSize, .StartTime, .SnapshotId, .Tags]'"
 # readonly DATE_CONDITION=".StartTime < $(date --date='-"$1 $2"' '+%Y-%m-%d %H:%M')"
-readonly DATE_EVAL="$(date --date="-$1 $2" '+%Y-%m-%d %H:%M')"
+readonly DATE_EVAL=`eval "date --date='-$1 $2' '+%Y-%m-%d %H:%M'"`
 #echo "DATE_EVAL = $DATE_EVAL"
-#exit 1
 DATE_CONDITION=".StartTime < \"$DATE_EVAL\""
-echo "DATE_CONDITION = $DATE_CONDITION"
+#echo "DATE_CONDITION = $DATE_CONDITION"
 readonly FILTER_CONDITION=".Tags[].Value == $3"
 
 show_usage() {
@@ -51,35 +50,35 @@ check_arguments() {
   local count=$1
   local interval=$2
 
-  if [[ -z count ]]; then
+  if [ -z "$count" ]; then
     echo -e $CANT_EXECUTE_MSG
     show_usage
-    exit 1
+    exit 0
   fi
-  if [[ count -lt 0 ]]; then
+  if [ "$count" -lt 0 ]; then
     echo -e $CANT_EXECUTE_MSG
     echo "Count should be >= 0"
     show_usage
-    exit 1
+    exit 0
   fi
-  if [[ count -gt $MAX_COUNT ]]; then
+  if [ "$count" -gt "$MAX_COUNT" ]; then
     echo -e $CANT_EXECUTE_MSG
     echo "Count should be <= $MAX_COUNT"
     show_usage
-    exit 1
+    exit 0
   fi
 
-  if [[ -z interval ]]; then
+  if [ -z "$interval" ]; then
     echo -e $CANT_EXECUTE_MSG
     show_usage
-    exit 1
+    exit 0
   fi
   found=`echo ${Intervals[*]} | grep "$interval"`
-  if [[ "${found}" == "" ]]; then
+  if [ -z "$found" ]; then
     echo "Interval ain't found"
     echo -e $CANT_EXECUTE_MSG
     show_usage
-    exit 1
+    exit 0
   fi
 }
 
