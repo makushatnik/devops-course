@@ -1,0 +1,12 @@
+click
+dataclasses
+Flask
+importlib-metadata
+itsdangerous
+Jinja2
+MarkupSafe
+typing-extensions
+Werkzeug
+zipp
+pyinstaller
+jsonschema
