@@ -49,6 +49,3 @@
     virtualenv: "{{flaskDir}}/venv"
     requirements: "{{flaskDir}}/requirements.txt"
 
-- name: Install Jsonschema library. (WA Until Serialization not works)
-  pip: name=jsonschema state=latest
-
