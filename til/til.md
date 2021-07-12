@@ -144,3 +144,21 @@ I learned few types of routes in Route53:
 ### 06/07/2021
 I learned how to get a substring from a source string in a Bash.  
 I learned how to call a function with parameters in a Bash.
+***
+### 07/07/2021
+I learned what is **$#** in Bash.  
+I also learned grouping, some mapping and reducing (count) techniques in **jq**.
+***
+### 08/07/2021
+I learned some new information about an AWS IAM.
+***
+### 09/07/2021
+I learned Docker volume mounts, networks, how to check them, events, Docker Compose, Docker Swarm, Docker Stack, Portainer, Docker Content Trust.
+***
+### 10/07/2021
+I learned how to do more precise Ansible Task configuration. I've read an article about "idempotency in the Ansible".  
+I learned multi-stage Docker builds.
+***
+### 11/07/2021
+I learned how to install Ant and Salesforce's Ant Migration Tool.  
+I learned how to create Docker "bind" mount.
