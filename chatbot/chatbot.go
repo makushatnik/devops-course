@@ -1,4 +1,4 @@
-// Telegram's ChatBot v1.2 created by Evgeny Ageev
+// Telegram's ChatBot v1.4 created by Evgeny Ageev
 
 package main
 
@@ -9,6 +9,8 @@ import (
   "log"
   "strings"
   "reflect"
+  "regexp"
+  "strconv"
 )
 
 type Task struct {
@@ -30,6 +32,7 @@ var (
   Config = getConfig("config.json")
   Bot, BotErr = tgbotapi.NewBotAPI(Config.Token)
   Tasks = []Task{
+    {Name: "AWS CloudFormation", Command: "/cloudform", Url: "cloudform"},
     {Name: "Animals Sounds", Command: "/task1", Url: "animals_sounds"},
     {Name: "Tricky Bash", Command: "/task2", Url: "tricky_bash"},
     {Name: "Telegrams Chatbot", Command: "/task3", Url: "chatbot"},
@@ -37,7 +40,6 @@ var (
     {Name: "Terraform", Command: "/task5", Url: "terraform"},
     {Name: "Github", Command: "/task6", Url: "github"},
     {Name: "AWS CLI", Command: "/task7", Url: "awscli"},
-    {Name: "AWS CloudFormation", Command: "/cloudform", Url: "cloudform"},
   }
 )
 
@@ -106,7 +108,7 @@ func main() {
       fmt.Println("CID = ", cId)
     }
     if reflect.TypeOf(mt).Kind() == reflect.String && mt != "" {
-      mt := strings.ToLower(mt)
+      mt := strings.ToLower(strings.TrimSpace(mt))
       //Run an appropriate command
       switch mt {
         case "/start":
@@ -115,22 +117,8 @@ func main() {
           sendMessage(cId, repo)
         case "/tasks":
           sendMessage(cId, FmtTasks)
-        case "/task1":
-          sendMessage(cId, concat(mainTree,Tasks[0].Url))
-        case "/task2":
-          sendMessage(cId, concat(mainTree,Tasks[1].Url))
-        case "/task3":
-          sendMessage(cId, concat(mainTree,Tasks[2].Url))
-        case "/task4":
-          sendMessage(cId, concat(mainTree,Tasks[3].Url))
-        case "/task5":
-          sendMessage(cId, concat(mainTree,Tasks[4].Url))
-        case "/task6":
-          sendMessage(cId, concat(mainTree,Tasks[5].Url))
-        case "/task7":
-          sendMessage(cId, concat(mainTree,Tasks[6].Url))
         case "/cloudform":
-          sendMessage(cId, concat(mainTree,Tasks[7].Url))
+          sendMessage(cId, concat(mainTree,Tasks[0].Url))
         case "/contacts":
           sendMessage(cId, contacts)
         case "/cv":
@@ -140,8 +128,19 @@ func main() {
         case "/settings":
           sendMessage(cId, NoSettingsAvailableMsg)
         default:
-          log.Println(mt)
-          sendMessage(cId, IllegalCommandErr)
+          //Check regular expression for tasks
+          matched, err := regexp.MatchString(`^/task[1-7]{1}$`, mt)
+          LogError(err)
+          if matched {
+            mt := strings.Replace(mt,"/task","",1)
+            digit, digitErr := strconv.Atoi(mt)
+            LogError(digitErr)
+            sendMessage(cId, concat(mainTree,Tasks[digit].Url))
+          } else {
+          //Wrong Command message
+            log.Println(mt)
+            sendMessage(cId, IllegalCommandErr)
+          }
       }
     } else {
       //Send a message about sending a photo or something other than a text message

@@ -4,26 +4,23 @@
 
   vars:
     home: /home/ec2-user
+    binDir: /usr/bin/chatbot
 
   tasks:
+# Install libraries.
   - name: Install Go
     yum:  name=golang state=latest
     become: yes
 
-  - name: PID stat
-    stat: path="{{home}}/save_pid.txt"
-    register: pid_stat
+  - name: Existence of Telegram library stat
+    stat: path="{{home}}/go/pkg/linux_amd64/github.com/go-telegram-bot-api"
+    register: telegram_stat
 
-  - name: Kill existing Process
-    command: "kill -9 `cat {{home}}/save_pid.txt`"
-    when: pid_stat.stat.exists
-    become: yes
+  - name: Download Telegram library
+    command: go get github.com/go-telegram-bot-api/telegram-bot-api
+    when: not telegram_stat.stat.exists
 
-  - name: Delete File with PID
-    file:
-      path: "{{home}}/save_pid.txt"
-      state: absent
-
+# Making directories.
   - name: Make Project Dir
     file:
       path: "{{home}}/go/src/chatbot"
@@ -37,8 +34,9 @@
 
   - name: Make Dir for builded files
     file:
-      path: "{{home}}/go/bin"
+      path: "{{binDir}}"
       state: directory
+    become: yes
 
   - name: Set GOPATH
     lineinfile:
@@ -46,39 +44,66 @@
       state: present
       line: export GOPATH="{{home}}/go"
 
-  - name: Move Source Files to the project Dir
+# Copying files.
+  - name: Copy Source Files to the project Dir
     copy:
       src: "{{item}}"
       dest: "{{home}}/go/src/chatbot"
       mode: 0774
     with_items:
       ['chatbot.go','concat.go','config.go','logger.go']
+    register: copy_src
 
-  - name: Move Config to the bin Dir
-    copy:
-      src: "{{item}}"
-      dest: "{{home}}/go/bin"
-      mode: 0755
-    with_items:
-      ['config.json']
-
-  - name: Download Telegram library
-    command: go get github.com/go-telegram-bot-api/telegram-bot-api
+#  - name: Show copy src debug info
+#    debug: var=copy_src
 
   - name: Go Build
     command: go build chatbot
+    when: copy_src.changed
 
-  - name: Chatbot stat
+  - name: Copy Config to the bin Dir
+    copy:
+      src: config.json
+      dest: "{{binDir}}"
+      mode: 0755
+    become: yes
+
+  - name: Copy service's Settings file
+    copy:
+      src: chatbot.service
+      dest: /etc/systemd/system
+      mode: 0755
+    become: yes
+    register: service_config
+
+  - name: Reload App
+    service: name=chatbot state=reloaded
+    become: yes
+    when: not copy_src.changed and service_config.changed
+
+  - name: Check existence of a binary file in a Bin Dir
+    stat: path="{{binDir}}/chatbot"
+    register: bin_stat
+
+  - name: Go Build Task
+    command: go build chatbot
+    when: not bin_stat.stat.exists
+
+  - name: Chatbot binary exists stat
     stat: path="{{home}}/chatbot"
     register: bot_stat
 
   - name: Move builded Chatbot file to a bin Dir
-    command: mv "{{home}}/chatbot" "{{home}}/go/bin/chatbot"
+    command: mv "{{home}}/chatbot" "{{binDir}}"
+    become: yes
     when: bot_stat.stat.exists
+    notify: Start App
 
-  - name: Execute bulded application
-    shell: "nohup {{home}}/go/bin/chatbot &"
+  handlers:
+  - name: Start App
+    service:
+      name: chatbot
+      state: restarted
+      enabled: yes
     become: yes
 
-  - name: Print the PID
-    shell: "echo $! > {{home}}/save_pid.txt"
