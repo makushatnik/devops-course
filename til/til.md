@@ -162,3 +162,11 @@ I learned multi-stage Docker builds.
 ### 11/07/2021
 I learned how to install Ant and Salesforce's Ant Migration Tool.  
 I learned how to create Docker "bind" mount.
+***
+### 12/07/2021
+I learned how to install Kubernetes, raise a cluster, managing nodes, Kubernetes Scheduler and Load Balancing.  
+I also learned some new information about AWS Lambda, CloudTrail, SNS, S3, how to mount EFS.
+***
+### 13/07/2021
+I learned **w**, **usermod**, **userdel**, **chage** commands.  
+I learned how to install and set up Gitlab, make your own git-repository server.
