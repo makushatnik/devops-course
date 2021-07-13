@@ -52,7 +52,14 @@
       mode: 0774
     with_items:
       ['chatbot.go','concat.go','config.go','logger.go']
-    notify: Go Build
+    register: copy_src
+
+#  - name: Show copy src debug info
+#    debug: var=copy_src
+
+  - name: Go Build
+    command: go build chatbot
+    when: copy_src.changed
 
   - name: Copy Config to the bin Dir
     copy:
@@ -67,7 +74,12 @@
       dest: /etc/systemd/system
       mode: 0755
     become: yes
-    notify: Reload App
+    register: service_config
+
+  - name: Reload App
+    service: name=chatbot state=reloaded
+    become: yes
+    when: not copy_src.changed and service_config.changed
 
   - name: Check existence of a binary file in a Bin Dir
     stat: path="{{binDir}}/chatbot"
@@ -77,7 +89,7 @@
     command: go build chatbot
     when: not bin_stat.stat.exists
 
-  - name: Chatbot stat
+  - name: Chatbot binary exists stat
     stat: path="{{home}}/chatbot"
     register: bot_stat
 
@@ -88,13 +100,6 @@
     notify: Start App
 
   handlers:
-  - name: Go Build
-    command: go build chatbot
-
-  - name: Reload App
-    service: name=chatbot state=reloaded
-    become: yes
-
   - name: Start App
     service:
       name: chatbot

@@ -129,7 +129,7 @@ func main() {
           sendMessage(cId, NoSettingsAvailableMsg)
         default:
           //Check regular expression for tasks
-          matched, err := regexp.MatchString(`task[1-7]{1}`, mt)
+          matched, err := regexp.MatchString(`^/task[1-7]{1}$`, mt)
           LogError(err)
           if matched {
             mt := strings.Replace(mt,"/task","",1)
