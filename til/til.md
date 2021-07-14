@@ -169,4 +169,12 @@ I also learned some new information about AWS Lambda, CloudTrail, SNS, S3, how t
 ***
 ### 13/07/2021
 I learned **w**, **usermod**, **userdel**, **chage** commands.  
-I learned how to install and set up Gitlab, make your own git-repository server.
+I learned how to install and set up Gitlab, make your own git-repository server.  
+I also learned that Metasploit, Gitlab were written on the Ruby.
+***
+### 14/07/2021
+I learned how to send an email on the Linux system, some information about Postfix.  
+I learned how to bind a DNS name to a particular EC2 instance using ELB and Route53.  
+I learned more about CloudFront and its advantages.  
+Also, now I know how to create a VPN connection using AWS.  
+Today I was learning SNS, SQS, SWF.
