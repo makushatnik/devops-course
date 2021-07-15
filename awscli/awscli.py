@@ -47,8 +47,9 @@ def main(count, interval, tag, save):
   """
   check_count(count)
   if interval not in intervals:
+    print("Incorrect interval argument")
     show_usage()
-    return "Incorrect interval argument"
+    sys.exit()
 
   show_ebs_list(count, interval, tag)
   if save:
@@ -56,6 +57,7 @@ def main(count, interval, tag, save):
 
 def check_count(count):
   if int(count) >= MAX_COUNT:
+    print("Incorrect count argument")
     show_usage()
     sys.exit()
 
