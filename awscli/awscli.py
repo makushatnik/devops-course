@@ -33,10 +33,13 @@ def main(count, interval, **kwargs):
     return "Incorrect interval argument"
 
 #  date_str="--date='-{} {}' '+%Y-%m-%d %H:%M'".format(count, interval)
-  date_str="--date='-{} {}'".format(count, interval)
-  date_eval=Popen(["date", date_str, "+%Y-%m-%d %H:%M"], stdout=PIPE)
-  print(date_eval)
-  date_condition=".StartTime < {}".format(date_eval)
+  date_str="--date=-{} {}".format(count, interval)
+  print(date_str)
+  p=Popen(["date", date_str, "+%Y-%m-%d %H:%M"], stdout=PIPE)
+  date_tmp=p.communicate()[0]
+  date_str=date_tmp.decode()
+  print(date_str)
+  date_condition=".StartTime < \"{}\"".format(date_str)
   print(date_condition)
   print(f"{EBS_LIST_COMMAND_START} select({date_condition}) {EBS_LIST_COMMAND_END}")
   os.system(EBS_LIST_COMMAND_START + " select(" + date_condition + ")" + EBS_LIST_COMMAND_END)
