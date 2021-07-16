@@ -11,6 +11,7 @@ intervals=['day','hour','minute']
 EBS_LIST_COMMAND_START="aws ec2 describe-snapshots --owner self --output json | jq '.Snapshots[] |"
 EBS_LIST_COMMAND_END="| [.Description, .VolumeSize, .StartTime, .SnapshotId, .Tags]'"
 CREATE_BUCKET_COMMAND="aws s3 mb s3://"
+NOT_FOUND_STR="NoSuchBucket"
 MAX_COUNT=2000000
 BUCKET="makushatnik-ebs"
 
@@ -61,9 +62,17 @@ def check_count(count):
     show_usage()
     sys.exit()
 
+def check_if_bucket_exists():
+  p=Popen(["aws", "s3", "ls", "s3://{}".format(BUCKET)], stdout=PIPE)
+  list_str=p.communicate()[0].decode()
+  if list_str.find(NOT_FOUND_STR) != -1:
+    return False
+  return True
+
 def save_into_s3():
-# TODO: Should we check if the bucket exists?
-  os.system(CREATE_BUCKET_COMMAND + BUCKET)
+  bucket_exists=check_if_bucket_exists()
+  if not bucket_exists:
+    os.system(CREATE_BUCKET_COMMAND + BUCKET)
   snapshot_id=input("Enter an EBS Snapshot Id: ")
   if snapshot_id:
     print(snapshot_id)
