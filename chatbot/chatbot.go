@@ -40,6 +40,7 @@ var (
     {Name: "Terraform", Command: "/task5", Url: "terraform"},
     {Name: "Github", Command: "/task6", Url: "github"},
     {Name: "AWS CLI", Command: "/task7", Url: "awscli"},
+    {Name: "Kubernetes", Command: "/kubernetes", Url: "kubernetes"},
   }
 )
 
@@ -119,6 +120,8 @@ func main() {
           sendMessage(cId, FmtTasks)
         case "/cloudform":
           sendMessage(cId, concat(mainTree,Tasks[0].Url))
+        case "/kubernetes":
+          sendMessage(cId, concat(mainTree,Tasks[8].Url))
         case "/contacts":
           sendMessage(cId, contacts)
         case "/cv":
