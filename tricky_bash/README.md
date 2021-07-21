@@ -15,8 +15,25 @@ The ***solution.sh*** Bash script handles it.
     -s STATE     show connections only in that state
     -r REQ_STR   get requested information from Whois
 
+Possible values for **STATE**:  
+* established  
+* syn-sent  
+* syn-recv  
+* fin-wait-1  
+* fin-wait-2  
+* time-wait  
+* closed  
+* close-wait  
+* last-ack  
+* listening  
+* closing  
+* connected  
+* synchronized  
+* bucket  
+* big
+
 ### Examples:
-`sudo solution.sh -n firefox -r Organization -c 6 -s estab`  
+`sudo solution.sh -n firefox -r Organization -c 6 -s established`  
 Returns name of organization connected by process with name **firefox** in established state and limit input to 6 lines  
 `sudo solution.sh -p 6099 -r OrgAbuseEmail -c 4`  
 Returns abuse email of organization connected by process with PID **6099** in any state and limit input to 4 lines  

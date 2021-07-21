@@ -22,9 +22,9 @@ YELLOW="\e[33m"
 ENDCOLOR="\e[0m"
 
 # Constants
-readonly cant_execute_msg="${RED}Can't execute the script${ENDCOLOR}"
 readonly net_tools_absent_err="You need to get ${RED}net-tools${ENDCOLOR} package installed"
 
+# Returns usage info
 show_usage_info() {
     # Display Help
     echo "-------------------------------------------------"
@@ -37,9 +37,9 @@ show_usage_info() {
     echo "Options:"
     echo "$(basename "${BASH_SOURCE[0]}") [-p PID]       get information by process PID"
     echo "$(basename "${BASH_SOURCE[0]}") [-n NAME]      get information by process name"
-    echo "$(basename "${BASH_SOURCE[0]}") [-c NUMBER]    count of strings in result"
-    echo "$(basename "${BASH_SOURCE[0]}") [-s STATE]     show connections only in that state"
-    echo "$(basename "${BASH_SOURCE[0]}") [-r REQ_STR]   get requested information from Whois"
+    echo "$(basename "${BASH_SOURCE[0]}") [-c NUMBER]    count of strings in the result"
+    echo "$(basename "${BASH_SOURCE[0]}") [-s STATE]     show connections in selected state"
+    echo "$(basename "${BASH_SOURCE[0]}") [-r REQ_STR]   get requested information from the Whois service"
     echo 
     echo -e "${GREEN}Usage example:${ENDCOLOR}"
     echo -e "${GREEN}Get info about Organization for process with name firefox and limit output to 6 lines${ENDCOLOR}"
@@ -48,23 +48,23 @@ show_usage_info() {
 
 }
 
-check_requirements() {
 # Check if ss and whois are installed.
+check_requirements() {
   if [[ -z "$(which ss)" ]]; then
-    echo -e $cant_execute_msg
     echo -e $net_tools_absent_err
-    echo -e "Please, read https://www.tecmint.com/install-netstat-in-linux/"
-    exit 1
+    echo -e "You have to get the ${RED}ss${ENDCOLOR} package installed"
+    exit 0
   fi
 
   if [[ -z "$(which whois)" ]]; then
     echo -e $cant_execute_msg
     echo -e $net_tools_absent_err
-    echo -e "Please read https://www.howtogeek.com/680086/how-to-use-the-whois-command-on-linux/"
-    exit 1
+    echo -e "You have to get the ${RED}whois${ENDCOLOR} package installed"
+    exit 0
   fi
 }
 
+# Checks that OS is Linux type.
 check_os_is_linux() {
 # MacOS netstat don't show procces name if by -p parameters
 # if it's MacOS exit with message
@@ -72,49 +72,91 @@ check_os_is_linux() {
   case "${unameOut}" in
     Linux*)  true;;
     *)       echo -e "This shell script correctly runs only under Linux, your OS is ${unameOut}"
-             exit 1
+             exit 0
   esac
 }
 
-get_ip_list() {
-  local PID_PNAME="$1"
-  local CONNECTIONS
-  local IP_LIST
-
-  if [ -z "$STATE" ]; then
-    CONNECTIONS="$(`echo $SS_LINUX_COMMAND`)"
-  else
-    CONNECTIONS="$(`echo $SS_LINUX_COMMAND` | grep $STATE)"
+# Checks if state is wrong and stop the program in that very case.
+check_state() {
+  local state_list=(
+    'established'
+    'syn-sent'
+    'syn-recv'
+    'fin-wait-1'
+    'fin-wait-2'
+    'time-wait'
+    'closed'
+    'close-wait'
+    'last-ack'
+    'listening'
+    'closing'
+    'connected'
+    'synchronized'
+    'bucket'
+    'big'
+  )
+  if [[ "${state_list[*]}" != *"$STATE"* ]]; then
+    echo -e "${RED}Incorrect state.${ENDCOLOR} Possible values are here:"
+    echo "${state_list[@]}"
+    exit 0
   fi
-  
-  if [ -z "${CONNECTIONS}" ]; then
-    echo -e "${RED}Can't find any connections with this parameters.${ENDCOLOR}"
-    exit 0;
-  fi
-
-  IP_LIST="$(echo "$CONNECTIONS" | awk '/'"$PID_PNAME"/' {print $6}' | cut -d: -f1 )"
-
-  if [ -z "${IP_LIST}" ]; then
-    echo -e "${RED}Can't find any connections with this parameters.${ENDCOLOR}"
-    exit 0;
-  fi
-  CONN_INFO="$(echo "$IP_LIST" | uniq -c | sort | tail -n$COUNT_LINES)"
 }
 
+# Returns the processed IP array.
+get_ip_list() {
+  local pid_pname="$1"
+  local connections
+  local ip_list
+
+  if [ -z "$STATE" ]; then
+    connections="$(`echo $SS_LINUX_COMMAND`)"
+  else
+    connections="$(`echo $SS_LINUX_COMMAND state $STATE`)"
+  fi
+  
+  if [ -z "${connections}" ]; then
+    echo -e "${RED}Can't find any connections with this parameters.${ENDCOLOR}"
+    exit 0;
+  fi
+
+  if [ -z "$STATE" ]; then
+    ip_list="$(echo "$connections" | awk '/'"$pid_pname"/' {print $6}')"
+  else
+    ip_list="$(echo "$connections" | awk '/'"$pid_pname"/' {print $5}')"
+  fi
+
+  # SECTION: cut -d: -f1
+  IFS=':'
+  for i in ${!ip_list[@]}; do
+    read -a TMP <<< "${ip_list[$i]}"
+    ip_list[$i]=${TMP[0]}
+  done
+  unset IFS
+  # END SECTION
+
+  if [ -z "${ip_list}" ]; then
+    echo -e "${RED}Can't find any connections with this parameters.${ENDCOLOR}"
+    exit 0;
+  fi
+  CONN_INFO="$(echo "$ip_list" | uniq -c | sort | tail -n$COUNT_LINES)"
+}
+
+# Returns Whois information from official whois-sites
+# using requested search string.
 get_whois_info() {
   local IP
   local CONN_COUNT
   local ORG_NAME
 
-  while IFS= read -r line
-  do
+  for i in ${!CONN_INFO[@]}; do
+    line=${CONN_INFO[$i]}
+
     IP=$(echo $line | awk '{print $2}');
     CONN_COUNT=$(echo $line | awk '{print $1}');
-    ORG_NAME=$(whois $IP | awk -F':' '/'^"$REQ_STR"/' {print $2}' | tr -d '[:space:]');
+    ORG_NAME=$(whois $IP | awk -F':' '/'^"$REQ_STR"/' {print $2}');
 
     echo -e "$CONN_COUNT" ":" "$IP" ":" $ORG_NAME
-        
-  done <<< "$CONN_INFO"
+  done
 }
 
 ### Main section
@@ -128,12 +170,16 @@ do
     n) PNAME=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]');;
     c) COUNT_LINES=${OPTARG};;
     r) REQ_STR=${OPTARG};;
-    s) STATE=$(echo "${OPTARG}" | tr '[:lower:]' '[:upper:]');;
+    s) STATE=${OPTARG};;
     *) echo "Illegal parameter."
        show_usage_info
        exit 0;;
   esac
 done
+
+if [ -n "$STATE" ]; then
+  check_state
+fi
 
 if [ $OPTIND -eq 1 ]; then
   show_usage_info
@@ -147,12 +193,13 @@ if [ -n "$PID" ] && [ -n "$PNAME" ]; then
   exit 0;
 fi
 
+state_str=${STATE:-ALL}
 echo -e "----------------------------------"
 echo -e "Running with following parameters:"
 echo -e "----------------------------------"
 echo -e "Get the next info from whois by regexp: ${GREEN}${REQ_STR}${ENDCOLOR}"
 echo -e "Output lines limit is: ${GREEN}${COUNT_LINES}${ENDCOLOR}"
-echo -e "State connection is: ${GREEN}${STATE}${ENDCOLOR}"
+echo -e "State connection is: ${GREEN}${state_str}${ENDCOLOR}"
 
 if [[ -n "${PID}" ]]; then
   echo -e "Information for process with PID: ${GREEN}${PID}${ENDCOLOR}"
