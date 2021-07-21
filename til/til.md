@@ -178,3 +178,17 @@ I learned how to bind a DNS name to a particular EC2 instance using ELB and Rout
 I learned more about CloudFront and its advantages.  
 Also, now I know how to create a VPN connection using AWS.  
 Today I was learning SNS, SQS, SWF.
+***
+### 15/07/2021
+I learned Elastic Container Service, CloudWatch, CloudTrail, Elastic BeanStalk, Elastic MapReduce.  
+I also learned Kubernetes managing application, managing data - volumes, PersistentVolume, PersistentVolumeClaim.
+***
+### 16/07/2021
+I learned some information about logging and security in Kubernetes.
+***
+### 19/07/2021
+I learned some information about at, route, ifconfig, nsswitch, resolv.  
+I also learned how to maintain databases, about types of databases, how to solve issues and optimize them.
+***
+### 20/07/2021
+I learned some information about rsyslog, lsof, lsat, chkrootkit, clamav, john, iptraf.
