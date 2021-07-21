@@ -184,11 +184,13 @@ I learned Elastic Container Service, CloudWatch, CloudTrail, Elastic BeanStalk, 
 I also learned Kubernetes managing application, managing data - volumes, PersistentVolume, PersistentVolumeClaim.
 ***
 ### 16/07/2021
-I learned some information about logging and security in Kubernetes.
+I learned some information about logging and security in Kubernetes.  
+I learned how to install RedHat Linux.
 ***
 ### 19/07/2021
 I learned some information about at, route, ifconfig, nsswitch, resolv.  
 I also learned how to maintain databases, about types of databases, how to solve issues and optimize them.
 ***
 ### 20/07/2021
-I learned some information about rsyslog, lsof, lsat, chkrootkit, clamav, john, iptraf.
+I learned some information about rsyslog, lsof, lsat, chkrootkit, clamav, john, iptraf.  
+I learned some configuration of CentOS.
