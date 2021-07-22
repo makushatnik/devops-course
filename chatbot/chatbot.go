@@ -1,4 +1,4 @@
-// Telegram's ChatBot v1.4 created by Evgeny Ageev
+// Telegram's ChatBot v1.6 created by Evgeny Ageev
 
 package main
 
@@ -41,6 +41,7 @@ var (
     {Name: "Github", Command: "/task6", Url: "github"},
     {Name: "AWS CLI", Command: "/task7", Url: "awscli"},
     {Name: "Kubernetes", Command: "/kubernetes", Url: "kubernetes"},
+    {Name: "Exam of CI/CD", Command: "/exam", Url: "exam"},
   }
 )
 
@@ -122,6 +123,8 @@ func main() {
           sendMessage(cId, concat(mainTree,Tasks[0].Url))
         case "/kubernetes":
           sendMessage(cId, concat(mainTree,Tasks[8].Url))
+        case "/exam":
+          sendMessage(cId, concat(mainTree,Tasks[9].Url))
         case "/contacts":
           sendMessage(cId, contacts)
         case "/cv":
