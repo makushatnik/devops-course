@@ -194,3 +194,19 @@ I also learned how to maintain databases, about types of databases, how to solve
 ### 20/07/2021
 I learned some information about rsyslog, lsof, lsat, chkrootkit, clamav, john, iptraf.  
 I learned some configuration of CentOS.
+***
+### 21/07/2021
+I learned some new PostgreSQL commands.
+***
+### 22/07/2021
+I was learning the 229 Federal law back and forth.
+***
+### 23/07/2021
+I was learning how to write a lawsuit. I had writed and sent a lawsuit, then.
+***
+### 26/07/2021
+I was learning the 118 Federal law back and forth.
+***
+### 27/07/2021
+I learned how to install Gin, write first web-server, run tests.  
+I also learned how to write & run tests in Python.
