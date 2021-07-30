@@ -26,6 +26,9 @@ Installing job going manually from the `/jobs` directory.
 You need to get access to your Linux server by **SSH** or something, upload xml files from the mentioned above directory into:  
 `/var/lib/jenkins/jobs`
 
+## Java Containers
+1st image for Java was - 441Mb.
+
 ## Using
 
 ### Continuous Integration
@@ -39,6 +42,11 @@ This is the part about deploy.
 Checking for changes in the ***dev*** branch going every 5 minutes.  
 If new changes appeared, Jenkins will start the job. It has linting, build, test, deploy stages.
 You need to merge Pull Request into ***dev*** branch to get a job started.
+
+### Troubleshooting
+I had encountered with some troubles:  
+1. No way to install Golang later version than 1.10.4 on **Ubuntu 18.04**. Which makes impossible to run Gin there.  
+I avoided that problem using CentOS instead. Docker **golang:latest** image is better option.
 
 ### Further development
 * If I had enough time, I would replace Github by Gitlab.

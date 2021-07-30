@@ -1,0 +1,11 @@
+.idea
+.mvn
+src
+.gitignore
+.dockerignore
+Dockerfile
+Jenkinsfile
+mvnw
+mvnw.cmd
+pom.xml
+*.md
