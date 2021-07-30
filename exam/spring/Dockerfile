@@ -1,7 +1,8 @@
-FROM fabric8/java-jboss-openjdk8-jdk:1.2.3
+FROM adoptopenjdk/openjdk11:alpine-jre
 
-ENV JAVA_APP_JAR hello-0.0.1.jar
-ENV AB_OFF true
+ARG JAR_FILE=target/hello-0.0.1.jar
+WORKDIR /opt/app
+COPY ${JAR_FILE} app.jar
 
 EXPOSE 8080
-ADD target/$JAVA_APP_JAR /deployments/
+ENTRYPOINT ["java","-jar","app.jar"]

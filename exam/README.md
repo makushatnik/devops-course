@@ -27,7 +27,10 @@ You need to get access to your Linux server by **SSH** or something, upload xml 
 `/var/lib/jenkins/jobs`
 
 ## Java Containers
-1st image for Java was - 441Mb.
+1st image for Java weighs - 441Mb. That image is considering for good JVM memory management using start container command like that:  
+`docker run -it --rm --name webserver -m 2Gb spring_hello exec java -Xmx1024m -cp . -jar /deployments/hello-0.0.1.jar`
+2nd image for Java weighs - 168Mb. It's from Java 11 and Alpine, start container command:  
+`docker run -d -p 8083:8080 -t spring_hello:0.0.1`
 
 ## Using
 
