@@ -35,8 +35,10 @@ Then add in the end of the .bashrc file:
 
 ### System settings
     sudo adduser --system --no-create-home --group --disabled-login sonarqube
-    sudo mkdir /opt/sonarqube
-    sudo mkdir /opt/sonarscanner
+    sudo mkdir /data/sonarqube
+    sudo mkdir /data/sonarscanner
+	sudo chown -R sonarqube:sonarqube /data/sonarqube
+	sudo chown -R sonarqube:sonarqube /data/sonarscanner
 
 ### Install Docker
     sudo apt install linux-image-extra-$(uname -r) linux-image-extra-virtual
@@ -56,6 +58,15 @@ Go to [SonarQube](https://www.sonarqube.org/downloads/) and download Community E
     
 
 ### Install Jenkins
+    wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+    sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > \
+      /etc/apt/sources.list.d/jenkins.list'
+    sudo apt-get update
+    sudo apt-get install jenkins
+	sudo usermod -aG docker jenkins
+    su - jenkins
+    ssh-keygen
+	Then paste ~/.ssh/id_rsa into Jenkins and ~/.ssh/id_rsa.pub into Github settings.
 
 ## Installing Jobs
 Installing job going manually from the `/jobs` directory.  
@@ -85,9 +96,10 @@ You need to merge Pull Request into ***dev*** branch to get a job started.
 ### Troubleshooting
 I had encountered with some troubles:  
 1. No way to install Golang later version than 1.10.4 on **Ubuntu 18.04**. Which makes impossible to run Gin there.  
-I avoided that problem using CentOS instead. Docker **golang:latest** image is better option.
+I avoided that problem using CentOS instead. Docker **golang:latest** image is better option.  
 2. There're some issues with installing SonarQube locally.  
-I solved these issues by installing Docker Compose and using SonarQube in a Docker image.
+I solved these issues by installing Docker Compose and using SonarQube in a Docker image.  
+3. I don't have outer IP, so Github Webhooks wouldn't work. Until I figure how to install Nginx on Windows and make some configs.
 
 ### Further development
 * If I had enough time, I would replace Github by Gitlab.
