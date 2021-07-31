@@ -26,10 +26,8 @@ pipeline {
     stage("Build") {
       steps {
         echo " ============= Build Started ========="
-        sh 'sudo mkdir /var/lib/jenkins/go/webserver'
-        sh 'sudo cp ./exam/gin/* /var/lib/jenkins/go/webserver'
-        sh 'sudo chown -R jenkins:jenkins /var/lib/jenkins/go/webserver'
         sh 'pwd'
+        sh 'sudo cp ./exam/gin/* /var/lib/jenkins/go/webserver'
         sh 'go build webserver'
       }
     }
