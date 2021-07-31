@@ -4,25 +4,27 @@ The Bot created on the **Go** language & **Telegram API**.
 
 Bot exists in Telegram under the ***[@MakushatnikBot](https://t.me/MakushatnikBot)*** nickname.  
 It understands few commands:  
-* /repo		 - Returns the link to my Github repository.
-* /tasks	 - Returns a list of tasks.
-* /task1	 - Returns a link to the solution of the Animal's Sounds task.
-* /task2	 - Returns a link to the solution of the Tricky Bash task.
-* /task3	 - Returns a link to the solution of the Chatbot task.
-* /task4     - Returns a link to the solution of the Docker task.
-* /task5     - Returns a link to the solution of the Terraform task.
-* /task6     - Returns a link to the solution of the Github task.
-* /task7     - Returns a link to the solution of the AWS CLI task.
-* /cloudform - Returns a link to an AWS CloudFormation case.
-* /contacts	 - Returns my actual contacts.
-* /cv		 - Returns an url-address to my CV.
-* /paypal	 - Returns my Paypal account.
-* /settings	 - Doesn't do anything.
+* /repo		  - Returns the link to my Github repository.
+* /tasks	  - Returns a list of tasks.
+* /task1	  - Returns a link to the solution of the Animal's Sounds task.
+* /task2	  - Returns a link to the solution of the Tricky Bash task.
+* /task3	  - Returns a link to the solution of the Chatbot task.
+* /task4      - Returns a link to the solution of the Docker task.
+* /task5      - Returns a link to the solution of the Terraform task.
+* /task6      - Returns a link to the solution of the Github task.
+* /task7      - Returns a link to the solution of the AWS CLI task.
+* /cloudform  - Returns a link to an AWS CloudFormation case.
+* /kubernetes - Returns a link to a Kubernetes case.
+* /exam       - Returns a link to an Examination of knowledge & skills in CI/CD, Python, Go.
+* /contacts	  - Returns my actual contacts.
+* /cv		  - Returns an url-address to my CV.
+* /paypal	  - Returns my Paypal account.
+* /settings	  - Doesn't do anything.
 
 It doesn't matter whether command was written in the lower or upper case.  
 Bot won't be able to get anything but words.
 ***
-## Steps to install the Application (suppose you have Linux Ubuntu)
+## Steps to install the Application
 
 ### AWS (or CGP or Azure, etc.)
 Go to you Cloud provider page, select and run an instance, get its **IP-address**.  
