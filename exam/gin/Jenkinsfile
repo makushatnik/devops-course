@@ -4,12 +4,11 @@
 properties([disableConcurrentBuilds()])
 
 pipeline {
-  agent { label 'master' }
+  agent any
   // every 5 mins go to Git & check for changes
-  triggers { pollSCM('H/5 * * * *') }
+  // triggers { pollSCM('H/5 * * * *') }
   
   options {
-    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     timestamps()
   }
 
@@ -20,12 +19,18 @@ pipeline {
   stages {
     stage("Code Lint") {
       steps {
+        sh 'ls -la'
+        sh 'pwd'
+        echo "Code Lint is started"
+        
         echo "Check code is right"
       }
     }
     stage("Build") {
       steps {
         echo " ============= Build Started ========="
+        sh 'ls -la'
+        sh 'pwd'
         sh 'go build webserver'
       }
     }
@@ -53,7 +58,7 @@ pipeline {
     stage("Deploy") {
       steps {
         echo " ============= Deploy Started ========="
-        sh 'docker push $ARTIFACT_NAME'
+        //sh 'docker push $ARTIFACT_NAME'
         sh 'docker run --rm -p 8081:8080 -d $ARTIFACT_NAME'
       }
     }
