@@ -1,0 +1,61 @@
+#!groovy
+// Gin building job.
+// Continuous Delivery part. Deploy to Production servers.
+properties([disableConcurrentBuilds()])
+
+pipeline {
+  agent { label 'master' }
+  // every 5 mins go to Git & check for changes
+  triggers { pollSCM('H/5 * * * *') }
+  
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    timestamps()
+  }
+
+  environment {
+    ARTIFACT_NAME = "makushatnik/gin_hello"
+  }
+
+  stages {
+    stage("Code Lint") {
+      steps {
+        echo "Check code is right"
+      }
+    }
+    stage("Build") {
+      steps {
+        echo " ============= Build Started ========="
+        sh 'go build webserver'
+      }
+    }
+    stage("Test") {
+      steps {
+        echo " ============= Tests Started ========="
+        sh 'go test webserver'
+      }
+    }
+    stage("Create docker image") {
+      steps {
+        echo " ============= Image creating Started ========="
+        sh 'docker build -t $ARTIFACT_NAME .'
+      }
+    }
+    stage("Docker login") {
+      steps {
+        echo " ============= Docker login ============="
+        withCredentials([usernamePassword(credentialsId: 'dockerhub_official', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+        sh """
+        docker login -u $USERNAME -p $PASSWORD
+        """
+      }
+    }
+    stage("Deploy") {
+      steps {
+        echo " ============= Deploy Started ========="
+        sh 'docker push $ARTIFACT_NAME'
+        sh 'docker run --rm -p 8081:8080 -d $ARTIFACT_NAME'
+      }
+    }
+  }
+}
