@@ -1,7 +1,6 @@
 #!groovy
 // Gin building job.
 // Continuous Delivery part. Deploy to Production servers.
-properties([disableConcurrentBuilds()])
 
 pipeline {
   agent any
