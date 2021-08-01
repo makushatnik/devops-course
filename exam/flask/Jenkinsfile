@@ -1,15 +1,13 @@
 #!groovy
 // Flask building job.
 // Continuous Delivery part. Deploy to Production servers.
-properties([disableConcurrentBuilds()])
 
 pipeline {
-  agent { label 'master' }
+  agent any
   // every 5 mins go to Git & check for changes
-  triggers { pollSCM('H/5 * * * *') }
+  // triggers { pollSCM('H/5 * * * *') }
   
   options {
-    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     timestamps()
   }
 
@@ -26,6 +24,7 @@ pipeline {
     stage("Test") {
       steps {
         echo " ============= Tests Started ========="
+        sh 'pwd'
         sh 'python3 app_test.py'
       }
     }
@@ -39,9 +38,10 @@ pipeline {
       steps {
         echo " ============= Docker login ============="
         withCredentials([usernamePassword(credentialsId: 'dockerhub_official', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-        sh """
-        docker login -u $USERNAME -p $PASSWORD
-        """
+          sh """
+          docker login -u $USERNAME -p $PASSWORD
+          """
+        }
       }
     }
     stage("Deploy") {
