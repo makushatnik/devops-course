@@ -24,6 +24,8 @@ pipeline {
     stage("Test") {
       steps {
         echo " ============= Tests Started ========="
+        git 'https://github.com/makushatnik/devops-course.git'
+        sh 'cd ./devops-course/exam/flask'
         sh 'pwd'
         sh 'python3 app_test.py'
       }
