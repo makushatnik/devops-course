@@ -16,42 +16,57 @@ pipeline {
   }
 
   stages {
-    stage("Code Lint") {
+
+    stage('Clone repository') {
       steps {
-        echo "Check code is right"
+        git branch: 'dev', changelog: false, credentialsId: 'github-ssh', poll: false, url: 'git@github.com:makushatnik/devops-course.git'
       }
     }
+
+    stage("Code Lint") {
+      agent { docker {
+          image 'newtmitch/sonar-scanner'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/exam/flask/conf:/usr/lib/sonar-scanner/conf'
+      } }
+      steps {
+        echo "=========== Code Lint is started ============="
+        sh 'sonar-scanner --version'
+      }
+    }
+
     stage("Test") {
       steps {
-        echo " ============= Tests Started ========="
-        git 'https://github.com/makushatnik/devops-course.git'
-        sh 'cd ./devops-course/exam/flask'
-        sh 'pwd'
-        sh 'python3 app_test.py'
-      }
-    }
-    stage("Create docker image") {
-      steps {
-        echo " ============= Image creating Started ========="
-        sh 'docker build -t $ARTIFACT_NAME .'
-      }
-    }
-    stage("Docker login") {
-      steps {
-        echo " ============= Docker login ============="
-        withCredentials([usernamePassword(credentialsId: 'dockerhub_official', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh """
-          docker login -u $USERNAME -p $PASSWORD
-          """
+        echo "============= Tests Started ========="
+        withPythonEnv('python3') {
+          sh 'pip install pytest'
+          sh 'pip install -r ${WORKSPACE}/exam/flask/requirements.txt'
+          sh 'pytest ${WORKSPACE}/exam/flask/app_test.py'
         }
       }
     }
+
+    stage("Docker") {
+      steps {
+        echo "============= Image creating Started ========="
+        sh 'docker build -t $ARTIFACT_NAME:$BUILD_ID -t $ARTIFACT_NAME:latest ${WORKSPACE}/exam/flask'
+      }
+    }
+
     stage("Deploy") {
       steps {
         echo " ============= Deploy Started ========="
-        sh 'docker push $ARTIFACT_NAME'
+        withDockerRegistry(credentialsId: 'dockerhub_official', url: '') {
+          sh 'docker push $ARTIFACT_NAME:$BUILD_ID'
+          sh 'docker push $ARTIFACT_NAME:latest'
+        }
         sh 'docker run --rm -p 8081:5000 -d $ARTIFACT_NAME'
       }
+    }
+  }
+
+  post {
+    always {
+      deleteDir()
     }
   }
 }

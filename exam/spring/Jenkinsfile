@@ -11,51 +11,85 @@ pipeline {
     timestamps()
   }
 
-  environment {
-    ARTIFACT_NAME = "makushatnik/spring_hello"
+  parameters {
+    string(name: 'ARTIFACT_NAME', defaultValue: 'makushatnik/spring_hello', description: 'Name of the image')
+    booleanParam(name: 'MIGRATE', defaultValue: false, description: 'Flag - if DB migration needed')
   }
 
   stages {
-    stage("Code Lint") {
+
+    stage('Clone repository') {
       steps {
-        echo "Check code is right"
+        git branch: 'dev', changelog: false, credentialsId: 'github-ssh', poll: false, url: 'git@github.com:makushatnik/devops-course.git'
       }
     }
+
+    stage("Code Lint") {
+      agent { docker {
+          image 'newtmitch/sonar-scanner'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/exam/spring/conf:/usr/lib/sonar-scanner/conf'
+      } }
+      steps {
+        echo "=========== Code Lint is started ============="
+        sh 'sonar-scanner --version'
+      }
+    }
+
     stage("Test") {
       steps {
         echo " ============= Tests Started ========="
-        sh 'mvnw test'
-        junit 'reports/**/*.xml'
+        echo "PARAM STR - ${params.ARTIFACT_NAME}"
+        sh 'cp -r ${WORKSPACE}/exam/spring/mvnw ${WORKSPACE}/exam/spring/.mvn ${WORKSPACE}/exam/spring/Dockerfile ${WORKSPACE}/exam/spring/.dockerignore ${WORKSPACE}/exam/spring/pom.xml ${WORKSPACE}/exam/spring/src ${WORKSPACE}'
+        sh 'chmod u+x ${WORKSPACE}/mvnw'
+        sh '${WORKSPACE}/mvnw test'
+        //junit 'reports/**/*.xml'
       }
     }
+
     stage("Build") {
       steps {
         echo " ============= Build Started ========="
-        sh 'mvnw package'
+        sh '${WORKSPACE}/mvnw package'
       }
     }
-    stage("Create docker image") {
+
+    stage("Liquibase") {
+      when {
+        expression { params.MIGRATE == true }
+      }
+      steps {
+        echo " ============= Liquibase Migration Started ========="
+      }
+    }
+
+    stage("Docker") {
       steps {
         echo " ============= Image creating Started ========="
-        sh 'docker build -t $ARTIFACT_NAME .'
+        sh """
+        docker build -t ${params.ARTIFACT_NAME}:$BUILD_ID -t ${params.ARTIFACT_NAME}:latest .
+        """
       }
     }
-    stage("Docker login") {
-      steps {
-        echo " ============= Docker login ============="
-        withCredentials([usernamePassword(credentialsId: 'dockerhub_official', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-          sh """
-          docker login -u $USERNAME -p $PASSWORD
-          """
-        }
-      }
-    }
+
     stage("Deploy") {
       steps {
         echo " ============= Deploy Started ========="
-        sh 'docker push $ARTIFACT_NAME'
-        sh 'docker run --rm -p 8083:8080 -d $ARTIFACT_NAME'
+        withDockerRegistry(credentialsId: 'dockerhub_official', url: '') {
+          sh """
+          docker push ${params.ARTIFACT_NAME}:$BUILD_ID
+          docker push ${params.ARTIFACT_NAME}:latest
+          """
+        }
+        sh """
+        docker run --rm -p 8083:8080 -d ${params.ARTIFACT_NAME}
+        """
       }
+    }
+  }
+
+  post {
+    always {
+      deleteDir()
     }
   }
 }
