@@ -208,5 +208,33 @@ I was learning how to write a lawsuit. I had writed and sent a lawsuit, then.
 I was learning the 118 Federal law back and forth.
 ***
 ### 27/07/2021
-I learned how to install Gin, write first web-server, run tests.  
+I learned how to install Gin, write first web-server on it, run tests.  
 I also learned how to write & run tests in Python.
+***
+### 28/07/2021
+I was creating Java/Spring web-server, Unit and integration test, Docker images for 3 web-servers.  
+I was learning Jenkins Pipeline in details.  
+I also learned how to set a Webhook in a Github and how to make it work in Jenkins.
+***
+### 29/07/2021
+I was writing Jenkinsfiles, learning about plugins needed.  
+I've figured out that I need some new Jenkins plugins for web-servers build jobs:
+* Git
+* Docker
+* Pyenv
+* Pipeline
+* Gitlab
+***
+### 30/07/2021
+I learned how to run SonarQube in a Docker container in a Jenkins Pipeline (with help of Docker Compose).  
+I learned how to set up projects in SonarQube.
+***
+### 02/08/2021
+I was installing Gitlab Community Edition on my CentOS 7 server with all packages it needed.  
+It was hell of a difficult job, I had troubles with running web interface, setting up SSH keys for users.  
+But I've done with it.  
+I learned how to send a mail into an email like this: `user1@centos7.local`
+***
+### 03/08/2021
+I was migrating my repository from Github to a Gitlab, setting up some Jenkins Pipelines, SonarQube.  
+I learned how to set Webhooks in a Gitlab and how to make it work in Jenkins.
