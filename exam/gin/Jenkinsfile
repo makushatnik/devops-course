@@ -1,0 +1,100 @@
+#!groovy
+// Gin building job.
+// Continuous Delivery part. Deploy to Production servers.
+
+pipeline {
+  agent any
+  // every 5 mins go to Git & check for changes
+  triggers { pollSCM('H/5 * * * *') }
+  
+  options {
+    timestamps()
+  }
+
+  environment {
+    ARTIFACT_NAME = "makushatnik/gin_hello"
+  }
+
+  stages {
+
+    stage('Clone repository') {
+      steps {
+        git branch: 'dev', changelog: false, credentialsId: 'github-ssh', poll: false, url: 'git@github.com:makushatnik/devops-course.git'
+      }
+    }
+
+    stage("SonarQube") {
+      agent { docker {
+          image 'newtmitch/sonar-scanner'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/conf:/usr/lib/sonar-scanner/conf \
+          --network host'
+          reuseNode true
+      } }
+      steps {
+        echo "=========== Code Lint is started ============="
+        sh 'sonar-scanner'
+      }
+    }
+
+    stage("Test") {
+      agent { docker {
+          image 'golang'
+          reuseNode true
+      } }
+      steps {
+        echo "============= Tests Started ========="
+        sh 'mkdir -p ${GOPATH}/src/webserver'
+        sh 'cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver'
+        sh 'go get github.com/gin-gonic/gin'
+        sh 'go get github.com/stretchr/testify/assert'
+        sh 'go clean -cache'
+        sh 'go test webserver -v -short'
+      }
+    }
+
+    stage("Build") {
+      agent { docker {
+          image 'golang'
+          reuseNode true
+      } }
+      environment {
+        GO111MODULE='off'
+        CGO_ENABLED=0
+        GOOS='linux'
+        XDG_CACHE_HOME='/tmp/.cache'
+      }
+      steps {
+        echo "============= Build Started ========="
+        sh 'mkdir -p ${GOPATH}/src/webserver'
+        sh 'cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver'
+        sh 'go get github.com/gin-gonic/gin'
+        sh 'go get github.com/stretchr/testify/assert'
+        sh 'go build webserver'
+      }
+    }
+
+    stage("Docker") {
+      steps {
+        echo " ============= Image creating Started ========="
+        sh 'docker build -t $ARTIFACT_NAME:$BUILD_ID -t $ARTIFACT_NAME:latest ${WORKSPACE}/exam/gin'
+      }
+    }
+
+    stage("Deploy") {
+      steps {
+        echo " ============= Deploy Started ========="
+        withDockerRegistry(credentialsId: 'dockerhub_official', url: '') {
+          sh 'docker push $ARTIFACT_NAME:$BUILD_ID'
+          sh 'docker push $ARTIFACT_NAME:latest'
+        }
+        sh 'docker run --rm -p 8082:8080 -d $ARTIFACT_NAME'
+      }
+    }
+  }
+
+  post {
+    always {
+      deleteDir()
+    }
+  }
+}

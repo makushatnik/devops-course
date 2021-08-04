@@ -1,0 +1,7 @@
+venv
+conf
+__pycache__
+Dockerfile
+Jenkinsfile
+.dockerignore
+*.md

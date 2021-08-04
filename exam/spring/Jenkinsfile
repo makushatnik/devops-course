@@ -1,0 +1,97 @@
+#!groovy
+// Spring building job.
+// Continuous Delivery part. Deploy to Production servers.
+
+pipeline {
+  agent any
+  // every 5 mins go to Git & check for changes
+  triggers { pollSCM('H/5 * * * *') }
+  
+  options {
+    timestamps()
+  }
+
+  parameters {
+    string(name: 'ARTIFACT_NAME', defaultValue: 'makushatnik/spring_hello', description: 'Name of the image')
+    booleanParam(name: 'MIGRATE', defaultValue: false, description: 'Flag - if DB migration needed')
+  }
+
+  stages {
+
+    stage('Clone repository') {
+      steps {
+        git branch: 'dev', changelog: false, credentialsId: 'github-ssh', poll: false, url: 'git@github.com:makushatnik/devops-course.git'
+      }
+    }
+
+    stage("SonarQube") {
+      agent { docker {
+          image 'newtmitch/sonar-scanner'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/conf:/usr/lib/sonar-scanner/conf \
+          --network host'
+          reuseNode true
+      } }
+      steps {
+        echo "=========== Code Lint is started ============="
+        sh 'sonar-scanner'
+      }
+    }
+
+    stage("Test") {
+      steps {
+        echo " ============= Tests Started ========="
+        echo "PARAM STR - ${params.ARTIFACT_NAME}"
+        sh 'cp -r ${WORKSPACE}/exam/spring/mvnw ${WORKSPACE}/exam/spring/.mvn ${WORKSPACE}/exam/spring/Dockerfile ${WORKSPACE}/exam/spring/.dockerignore ${WORKSPACE}/exam/spring/pom.xml ${WORKSPACE}/exam/spring/src ${WORKSPACE}'
+        sh 'chmod u+x ${WORKSPACE}/mvnw'
+        sh '${WORKSPACE}/mvnw test'
+        //junit 'reports/**/*.xml'
+      }
+    }
+
+    stage("Build") {
+      steps {
+        echo " ============= Build Started ========="
+        sh '${WORKSPACE}/mvnw package'
+      }
+    }
+
+    stage("Liquibase") {
+      when {
+        expression { params.MIGRATE == true }
+      }
+      steps {
+        echo " ============= Liquibase Migration Started ========="
+      }
+    }
+
+    stage("Docker") {
+      steps {
+        echo " ============= Image creating Started ========="
+        sh """
+        docker build -t ${params.ARTIFACT_NAME}:$BUILD_ID -t ${params.ARTIFACT_NAME}:latest .
+        """
+      }
+    }
+
+    stage("Deploy") {
+      steps {
+        echo " ============= Deploy Started ========="
+        withDockerRegistry(credentialsId: 'dockerhub_official', url: '') {
+          sh """
+          docker push ${params.ARTIFACT_NAME}:$BUILD_ID
+          docker push ${params.ARTIFACT_NAME}:latest
+          """
+        }
+        sh """
+        docker run --rm -p 8083:8080 -d ${params.ARTIFACT_NAME}
+        """
+      }
+    }
+  }
+
+  post {
+    always {
+      deleteDir()
+    }
+  }
+}
