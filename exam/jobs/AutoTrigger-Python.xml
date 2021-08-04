@@ -55,7 +55,7 @@ Continuous Integration part.</description>
           <excludeBranchesSpec></excludeBranchesSpec>
           <sourceBranchRegex></sourceBranchRegex>
           <targetBranchRegex></targetBranchRegex>
-          <secretToken>{AQAAABAAAAAwYGQwRKIX44wWp+Y1lezZOWXyZbE5OejT1eWFgNuSHz3k/ZA4U8WUXPsEaDUEj5EoC5FteG15BISiUsrfGpd0Ow==}</secretToken>
+          <secretToken>{AQAAABAAAAAw1mM6TEpWUye6XllE+4xzvXgdcp+bk3mIWJ9F/zRfp8yXk/m2Yk/Nq6NJP4/SdYtZ1ac3WI8LYa4CTl2SMGaGCg==}</secretToken>
           <pendingBuildName></pendingBuildName>
           <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>
         </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
@@ -70,6 +70,28 @@ Continuous Integration part.</description>
     stage(&apos;Clone repository&apos;) {
       steps {
         git branch: &apos;dev&apos;, changelog: false, credentialsId: &apos;github-ssh&apos;, poll: false, url: &apos;git@github.com:makushatnik/devops-course.git&apos;
+      }
+    }
+    stage(&apos;Preparing&apos;) {
+      steps {
+        echo &quot;============= Preparing Started ================&quot;
+        sh &apos;&apos;&apos;
+        rm -rf ${WORKSPACE}/conf
+        rm -rf ${WORKSPACE}/about
+        rm -rf ${WORKSPACE}/animals_sounds
+        rm -rf ${WORKSPACE}/awscli
+        rm -rf ${WORKSPACE}/chatbot
+        rm -rf ${WORKSPACE}/cloudform
+        rm -rf ${WORKSPACE}/docker
+        rm -rf ${WORKSPACE}/github
+        rm -rf ${WORKSPACE}/kubernetes
+        rm -rf ${WORKSPACE}/terraform
+        rm -rf ${WORKSPACE}/til
+        rm -rf ${WORKSPACE}/tricky_bash
+        mv -f ${WORKSPACE}/exam/flask/* ${WORKSPACE}/
+        rm -rf ${WORKSPACE}/exam
+        mkdir -p ${WORKSPACE}/tests
+        &apos;&apos;&apos;
       }
     }
     stage(&quot;SonarQube&quot;) {
@@ -93,6 +115,11 @@ Continuous Integration part.</description>
           sh &apos;pytest ${WORKSPACE}/exam/flask/app_test.py&apos;
         }
       }
+    }
+  }
+  post {
+    always {
+      deleteDir()
     }
   }
 }</script>

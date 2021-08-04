@@ -24,6 +24,48 @@ pipeline {
       }
     }
 
+    stage('Preparing') {
+      steps {
+        echo "============= Preparing Started ================"
+        sh '''
+        rm -rf ${WORKSPACE}/conf
+        rm -rf ${WORKSPACE}/about
+        rm -rf ${WORKSPACE}/animals_sounds
+        rm -rf ${WORKSPACE}/awscli
+        rm -rf ${WORKSPACE}/chatbot
+        rm -rf ${WORKSPACE}/cloudform
+        rm -rf ${WORKSPACE}/docker
+        rm -rf ${WORKSPACE}/github
+        rm -rf ${WORKSPACE}/kubernetes
+        rm -rf ${WORKSPACE}/terraform
+        rm -rf ${WORKSPACE}/til
+        rm -rf ${WORKSPACE}/tricky_bash
+        rm -rf ${WORKSPACE}/src
+        mv -f ${WORKSPACE}/exam/spring/* ${WORKSPACE}/
+        rm -rf ${WORKSPACE}/exam
+        chmod u+x ${WORKSPACE}/mvnw
+        mkdir -p ${WORKSPACE}/tests
+        '''
+      }
+    }
+
+    stage("Test") {
+      options { retry(3) }
+      steps {
+        echo " ============= Tests Started ========="
+        echo "PARAM STR - ${params.ARTIFACT_NAME}"
+        sh '${WORKSPACE}/mvnw test'
+        //junit 'reports/**/*.xml'
+      }
+    }
+
+    stage("Build") {
+      steps {
+        echo " ============= Build Started ========="
+        sh '${WORKSPACE}/mvnw package'
+      }
+    }
+
     stage("SonarQube") {
       agent { docker {
           image 'newtmitch/sonar-scanner'
@@ -34,24 +76,6 @@ pipeline {
       steps {
         echo "=========== Code Lint is started ============="
         sh 'sonar-scanner'
-      }
-    }
-
-    stage("Test") {
-      steps {
-        echo " ============= Tests Started ========="
-        echo "PARAM STR - ${params.ARTIFACT_NAME}"
-        sh 'cp -r ${WORKSPACE}/exam/spring/mvnw ${WORKSPACE}/exam/spring/.mvn ${WORKSPACE}/exam/spring/Dockerfile ${WORKSPACE}/exam/spring/.dockerignore ${WORKSPACE}/exam/spring/pom.xml ${WORKSPACE}/exam/spring/src ${WORKSPACE}'
-        sh 'chmod u+x ${WORKSPACE}/mvnw'
-        sh '${WORKSPACE}/mvnw test'
-        //junit 'reports/**/*.xml'
-      }
-    }
-
-    stage("Build") {
-      steps {
-        echo " ============= Build Started ========="
-        sh '${WORKSPACE}/mvnw package'
       }
     }
 

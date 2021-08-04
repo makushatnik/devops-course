@@ -23,6 +23,29 @@ pipeline {
       }
     }
 
+    stage('Preparing') {
+      steps {
+        echo "============= Preparing Started ================"
+        sh '''
+        rm -rf ${WORKSPACE}/conf
+        rm -rf ${WORKSPACE}/about
+        rm -rf ${WORKSPACE}/animals_sounds
+        rm -rf ${WORKSPACE}/awscli
+        rm -rf ${WORKSPACE}/chatbot
+        rm -rf ${WORKSPACE}/cloudform
+        rm -rf ${WORKSPACE}/docker
+        rm -rf ${WORKSPACE}/github
+        rm -rf ${WORKSPACE}/kubernetes
+        rm -rf ${WORKSPACE}/terraform
+        rm -rf ${WORKSPACE}/til
+        rm -rf ${WORKSPACE}/tricky_bash
+        mv -f ${WORKSPACE}/exam/gin/* ${WORKSPACE}/
+        rm -rf ${WORKSPACE}/exam
+        mkdir -p ${WORKSPACE}/tests
+        '''
+      }
+    }
+
     stage("SonarQube") {
       agent { docker {
           image 'newtmitch/sonar-scanner'
@@ -37,14 +60,18 @@ pipeline {
     }
 
     stage("Test") {
+      options { retry(3) }
       agent { docker {
           image 'golang'
           reuseNode true
       } }
+      environment {
+        XDG_CACHE_HOME='/tmp/.cache'
+      }
       steps {
         echo "============= Tests Started ========="
         sh 'mkdir -p ${GOPATH}/src/webserver'
-        sh 'cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver'
+        sh 'cp -f ${WORKSPACE}/go.mod ${WORKSPACE}/go.sum ${WORKSPACE}/*.go ${GOPATH}/src/webserver'
         sh 'go get github.com/gin-gonic/gin'
         sh 'go get github.com/stretchr/testify/assert'
         sh 'go clean -cache'
@@ -66,7 +93,7 @@ pipeline {
       steps {
         echo "============= Build Started ========="
         sh 'mkdir -p ${GOPATH}/src/webserver'
-        sh 'cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver'
+        sh 'cp -f ${WORKSPACE}/go.mod ${WORKSPACE}/go.sum ${WORKSPACE}/*.go ${GOPATH}/src/webserver'
         sh 'go get github.com/gin-gonic/gin'
         sh 'go get github.com/stretchr/testify/assert'
         sh 'go build webserver'
@@ -76,7 +103,7 @@ pipeline {
     stage("Docker") {
       steps {
         echo " ============= Image creating Started ========="
-        sh 'docker build -t $ARTIFACT_NAME:$BUILD_ID -t $ARTIFACT_NAME:latest ${WORKSPACE}/exam/gin'
+        sh 'docker build -t $ARTIFACT_NAME:$BUILD_ID -t $ARTIFACT_NAME:latest .'
       }
     }
 

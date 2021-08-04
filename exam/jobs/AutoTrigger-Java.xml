@@ -47,7 +47,7 @@ Continuous Integration part.</description>
           <excludeBranchesSpec></excludeBranchesSpec>
           <sourceBranchRegex></sourceBranchRegex>
           <targetBranchRegex></targetBranchRegex>
-          <secretToken>{AQAAABAAAAAwPgdACFPGeqxlXbZxZHnOt+FGsZ1i08P9vedcyH+vYkLgRY56TuAd/3abcnpd7uABJijoeokiePAysp9FAHG2mQ==}</secretToken>
+          <secretToken>{AQAAABAAAAAw+G/N6q65+3N72IyqmtEGByDFkYsqLHbFkGegZAJoVabTSrS9Z0EFzb2jcbHCvYCdPhhaXmgDbsPjiOoFjQJZRg==}</secretToken>
           <pendingBuildName></pendingBuildName>
           <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>
         </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
@@ -64,6 +64,44 @@ Continuous Integration part.</description>
         git branch: &apos;dev&apos;, changelog: false, credentialsId: &apos;github-ssh&apos;, poll: false, url: &apos;git@github.com:makushatnik/devops-course.git&apos;
       }
     }
+    stage(&apos;Preparing&apos;) {
+      steps {
+        echo &quot;============= Preparing Started ================&quot;
+        sh &apos;&apos;&apos;
+        rm -rf ${WORKSPACE}/conf
+        rm -rf ${WORKSPACE}/about
+        rm -rf ${WORKSPACE}/animals_sounds
+        rm -rf ${WORKSPACE}/awscli
+        rm -rf ${WORKSPACE}/chatbot
+        rm -rf ${WORKSPACE}/cloudform
+        rm -rf ${WORKSPACE}/docker
+        rm -rf ${WORKSPACE}/github
+        rm -rf ${WORKSPACE}/kubernetes
+        rm -rf ${WORKSPACE}/terraform
+        rm -rf ${WORKSPACE}/til
+        rm -rf ${WORKSPACE}/tricky_bash
+        rm -rf ${WORKSPACE}/src
+        mv -f ${WORKSPACE}/exam/spring/* ${WORKSPACE}/
+        rm -rf ${WORKSPACE}/exam
+        chmod u+x ${WORKSPACE}/mvnw
+        mkdir -p ${WORKSPACE}/tests
+        &apos;&apos;&apos;
+      }
+    }
+    stage(&quot;Test&quot;) {
+      options { retry(3) }
+      steps {
+        echo &quot; ============= Tests Started =========&quot;
+        sh &apos;${WORKSPACE}/mvnw test&apos;
+        //junit &apos;reports/**/*.xml&apos;
+      }
+    }
+    stage(&quot;Build&quot;) {
+      steps {
+        echo &quot; ============= Build Started =========&quot;
+        sh &apos;${WORKSPACE}/mvnw package&apos;
+      }
+    }
     stage(&quot;SonarQube&quot;) {
       agent { docker {
           image &apos;newtmitch/sonar-scanner&apos;
@@ -76,21 +114,10 @@ Continuous Integration part.</description>
         sh &apos;sonar-scanner&apos;
       }
     }
-    stage(&quot;Test&quot;) {
-      steps {
-        echo &quot; ============= Tests Started =========&quot;
-        echo &quot;PARAM STR - ${params.ARTIFACT_NAME}&quot;
-        sh &apos;cp -r ${WORKSPACE}/exam/spring/mvnw ${WORKSPACE}/exam/spring/.mvn ${WORKSPACE}/exam/spring/Dockerfile ${WORKSPACE}/exam/spring/.dockerignore ${WORKSPACE}/exam/spring/pom.xml ${WORKSPACE}/exam/spring/src ${WORKSPACE}&apos;
-        sh &apos;chmod u+x ${WORKSPACE}/mvnw&apos;
-        sh &apos;${WORKSPACE}/mvnw test&apos;
-        //junit &apos;reports/**/*.xml&apos;
-      }
-    }
-    stage(&quot;Build&quot;) {
-      steps {
-        echo &quot; ============= Build Started =========&quot;
-        sh &apos;${WORKSPACE}/mvnw package&apos;
-      }
+  }
+  post {
+    always {
+      deleteDir()
     }
   }
 }</script>

@@ -10,8 +10,7 @@
 7. Spring
 8. Docker/Docker Compose
 9. SonarQube
-10. Rsyslog
-11. Git
+10. Git
 
 ## Preparing for running
 
@@ -53,8 +52,10 @@ Then add in the end of the .bashrc file:
     sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
     sudo chmod +x /usr/bin/docker-compose
 	
-### Install SonarQube
-Go to [SonarQube](https://www.sonarqube.org/downloads/) and download Community Edition. After that type some commands:
+### SonarQube
+Run SonarQube:
+`docker-compose -f sonarqube.yml up`
+and add 3 projects there, get 3 access tokens.
 
 ### Install Gitlab
 Go to another server on CentOS Linux and install Gitlab.  
@@ -131,7 +132,7 @@ You need to get access to your Linux server by **SSH** or something, upload xml 
 `docker run -d -p 8083:8080 -t spring_hello:0.0.1`
 
 ## Using
-Jenkins build jobs save images in the (official docker registry)[http://hub.docker.com].
+Jenkins build jobs save images in the [official docker registry](http://hub.docker.com).
 
 ### Continuous Integration
 This is the part about code linting, build, test and getting results back into Git service.  
