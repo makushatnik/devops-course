@@ -5,7 +5,7 @@
 pipeline {
   agent any
   // every 5 mins go to Git & check for changes
-  // triggers { pollSCM('H/5 * * * *') }
+  triggers { pollSCM('H/5 * * * *') }
   
   options {
     timestamps()
@@ -23,14 +23,32 @@ pipeline {
       }
     }
 
-    stage("Code Lint") {
+    stage("SonarQube") {
       agent { docker {
           image 'newtmitch/sonar-scanner'
-          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/exam/gin/conf:/usr/lib/sonar-scanner/conf'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/conf:/usr/lib/sonar-scanner/conf \
+          --network host'
+          reuseNode true
       } }
       steps {
         echo "=========== Code Lint is started ============="
-        sh 'sonar-scanner --version'
+        sh 'sonar-scanner'
+      }
+    }
+
+    stage("Test") {
+      agent { docker {
+          image 'golang'
+          reuseNode true
+      } }
+      steps {
+        echo "============= Tests Started ========="
+        sh 'mkdir -p ${GOPATH}/src/webserver'
+        sh 'cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver'
+        sh 'go get github.com/gin-gonic/gin'
+        sh 'go get github.com/stretchr/testify/assert'
+        sh 'go clean -cache'
+        sh 'go test webserver -v -short'
       }
     }
 
@@ -51,18 +69,7 @@ pipeline {
         sh 'cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver'
         sh 'go get github.com/gin-gonic/gin'
         sh 'go get github.com/stretchr/testify/assert'
-        sh 'go clean -cache'
-        // can't start it in a separate state
-        sh 'go test webserver -v -short'
         sh 'go build webserver'
-      }
-    }
-
-    stage("Test") {
-      agent { docker { image 'golang' } }
-      steps {
-        echo "============= Tests Started ========="
-        echo "All tests had passed successfully"
       }
     }
 

@@ -5,7 +5,7 @@
 pipeline {
   agent any
   // every 5 mins go to Git & check for changes
-  // triggers { pollSCM('H/5 * * * *') }
+  triggers { pollSCM('H/5 * * * *') }
   
   options {
     timestamps()
@@ -24,14 +24,16 @@ pipeline {
       }
     }
 
-    stage("Code Lint") {
+    stage("SonarQube") {
       agent { docker {
           image 'newtmitch/sonar-scanner'
-          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/exam/spring/conf:/usr/lib/sonar-scanner/conf'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/conf:/usr/lib/sonar-scanner/conf \
+          --network host'
+          reuseNode true
       } }
       steps {
         echo "=========== Code Lint is started ============="
-        sh 'sonar-scanner --version'
+        sh 'sonar-scanner'
       }
     }
 

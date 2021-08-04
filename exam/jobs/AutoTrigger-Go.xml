@@ -18,11 +18,39 @@ Continuous Integration part.</description>
       <projectUrl>git@github.com:makushatnik/devops-course.git/</projectUrl>
       <displayName></displayName>
     </com.coravy.hudson.plugins.github.GithubProjectProperty>
+    <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin="gitlab-plugin@1.5.20">
+      <gitLabConnection>Gitlab</gitLabConnection>
+      <jobCredentialId></jobCredentialId>
+      <useAlternativeCredential>false</useAlternativeCredential>
+    </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>
     <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
       <triggers>
-        <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.33.1">
+        <com.dabsquared.gitlabjenkins.GitLabPushTrigger plugin="gitlab-plugin@1.5.20">
           <spec></spec>
-        </com.cloudbees.jenkins.GitHubPushTrigger>
+          <triggerOnPush>true</triggerOnPush>
+          <triggerToBranchDeleteRequest>false</triggerToBranchDeleteRequest>
+          <triggerOnMergeRequest>true</triggerOnMergeRequest>
+          <triggerOnlyIfNewCommitsPushed>false</triggerOnlyIfNewCommitsPushed>
+          <triggerOnPipelineEvent>false</triggerOnPipelineEvent>
+          <triggerOnAcceptedMergeRequest>false</triggerOnAcceptedMergeRequest>
+          <triggerOnClosedMergeRequest>false</triggerOnClosedMergeRequest>
+          <triggerOnApprovedMergeRequest>true</triggerOnApprovedMergeRequest>
+          <triggerOpenMergeRequestOnPush>never</triggerOpenMergeRequestOnPush>
+          <triggerOnNoteRequest>true</triggerOnNoteRequest>
+          <noteRegex>Jenkins please retry a build</noteRegex>
+          <ciSkip>true</ciSkip>
+          <skipWorkInProgressMergeRequest>true</skipWorkInProgressMergeRequest>
+          <labelsThatForcesBuildIfAdded></labelsThatForcesBuildIfAdded>
+          <setBuildDescription>true</setBuildDescription>
+          <branchFilterType>All</branchFilterType>
+          <includeBranchesSpec></includeBranchesSpec>
+          <excludeBranchesSpec></excludeBranchesSpec>
+          <sourceBranchRegex></sourceBranchRegex>
+          <targetBranchRegex></targetBranchRegex>
+          <secretToken>{AQAAABAAAAAwwA+qkpSNGpPoiQflLSXWujzLRbux8udGdsCnOAUXFwrSinaofN5gtudPoXz+X/+cILO5aI/oJna67Q5vWKSe5A==}</secretToken>
+          <pendingBuildName></pendingBuildName>
+          <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>
+        </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
       </triggers>
     </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
   </properties>
@@ -31,22 +59,56 @@ Continuous Integration part.</description>
   agent any
 
   stages {
-    stage(&quot;Code Lint&quot;) {
+    stage(&apos;Clone repository&apos;) {
       steps {
-        echo &quot;Check code is right&quot;
-        sh &apos;ls -la&apos;
+        git branch: &apos;dev&apos;, changelog: false, credentialsId: &apos;github-ssh&apos;, poll: false, url: &apos;git@github.com:makushatnik/devops-course.git&apos;
       }
     }
-    stage(&quot;Build&quot;) {
+    stage(&quot;SonarQube&quot;) {
+      agent { docker {
+          image &apos;newtmitch/sonar-scanner&apos;
+          args &apos;-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/conf:/usr/lib/sonar-scanner/conf \
+          --network host&apos;
+          reuseNode true
+      } }
       steps {
-        echo &quot; ============= Build Started =========&quot;
-        sh &apos;go build webserver&apos;
+        echo &quot;=========== Code Lint is started =============&quot;
+        sh &apos;sonar-scanner&apos;
       }
     }
     stage(&quot;Test&quot;) {
+      agent { docker {
+          image &apos;golang&apos;
+          reuseNode true
+      } }
       steps {
-        echo &quot; ============= Tests Started =========&quot;
-        sh &apos;go test webserver&apos;
+        echo &quot;============= Tests Started =========&quot;
+        sh &apos;mkdir -p ${GOPATH}/src/webserver&apos;
+        sh &apos;cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver&apos;
+        sh &apos;go get github.com/gin-gonic/gin&apos;
+        sh &apos;go get github.com/stretchr/testify/assert&apos;
+        sh &apos;go clean -cache&apos;
+        sh &apos;go test webserver -v -short&apos;
+      }
+    }
+    stage(&quot;Build&quot;) {
+      agent { docker {
+          image &apos;golang&apos;
+          reuseNode true
+      } }
+      environment {
+        GO111MODULE=&apos;off&apos;
+        CGO_ENABLED=0
+        GOOS=&apos;linux&apos;
+        XDG_CACHE_HOME=&apos;/tmp/.cache&apos;
+      }
+      steps {
+        echo &quot;============= Build Started =========&quot;
+        sh &apos;mkdir -p ${GOPATH}/src/webserver&apos;
+        sh &apos;cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver&apos;
+        sh &apos;go get github.com/gin-gonic/gin&apos;
+        sh &apos;go get github.com/stretchr/testify/assert&apos;
+        sh &apos;go build webserver&apos;
       }
     }
   }

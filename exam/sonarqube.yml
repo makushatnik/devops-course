@@ -4,6 +4,7 @@ networks:
     driver: bridge
 services:
   sonarqube:
+    container_name: sonarqube_sonarqube
     user: 125:129
     image: sonarqube
     ports:
