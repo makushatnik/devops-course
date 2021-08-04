@@ -1,15 +1,13 @@
 #!groovy
 // Flask building job.
 // Continuous Delivery part. Deploy to Production servers.
-properties([disableConcurrentBuilds()])
 
 pipeline {
-  agent { label 'master' }
+  agent any
   // every 5 mins go to Git & check for changes
   triggers { pollSCM('H/5 * * * *') }
   
   options {
-    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     timestamps()
   }
 
@@ -18,38 +16,81 @@ pipeline {
   }
 
   stages {
-    stage("Code Lint") {
+
+    stage('Clone repository') {
       steps {
-        echo "Check code is right"
+        git branch: 'dev', changelog: false, credentialsId: 'github-ssh', poll: false, url: 'git@github.com:makushatnik/devops-course.git'
       }
     }
+
+    stage('Preparing') {
+      steps {
+        echo "============= Preparing Started ================"
+        sh '''
+        rm -rf ${WORKSPACE}/conf
+        rm -rf ${WORKSPACE}/about
+        rm -rf ${WORKSPACE}/animals_sounds
+        rm -rf ${WORKSPACE}/awscli
+        rm -rf ${WORKSPACE}/chatbot
+        rm -rf ${WORKSPACE}/cloudform
+        rm -rf ${WORKSPACE}/docker
+        rm -rf ${WORKSPACE}/github
+        rm -rf ${WORKSPACE}/kubernetes
+        rm -rf ${WORKSPACE}/terraform
+        rm -rf ${WORKSPACE}/til
+        rm -rf ${WORKSPACE}/tricky_bash
+        mv -f ${WORKSPACE}/exam/flask/* ${WORKSPACE}/
+        rm -rf ${WORKSPACE}/exam
+        '''
+      }
+    }
+
+    stage("SonarQube") {
+      agent { docker {
+          image 'newtmitch/sonar-scanner'
+          args '-v /var/run/docker.sock:/var/run/docker.sock -v ${WORKSPACE}/conf:/usr/lib/sonar-scanner/conf \
+          --network host'
+          reuseNode true
+      } }
+      steps {
+        echo "=========== Code Lint is started ============="
+        sh 'sonar-scanner'
+      }
+    }
+
     stage("Test") {
       steps {
-        echo " ============= Tests Started ========="
-        sh 'python3 app_test.py'
+        echo "============= Tests Started ========="
+        withPythonEnv('python3') {
+          sh 'pip install pytest'
+          sh 'pip install -r ${WORKSPACE}/exam/flask/requirements.txt'
+          sh 'pytest ${WORKSPACE}/exam/flask/app_test.py'
+        }
       }
     }
-    stage("Create docker image") {
+
+    stage("Docker") {
       steps {
-        echo " ============= Image creating Started ========="
-        sh 'docker build -t $ARTIFACT_NAME .'
+        echo "============= Image creating Started ========="
+        sh 'docker build -t $ARTIFACT_NAME:$BUILD_ID -t $ARTIFACT_NAME:latest ${WORKSPACE}/exam/flask'
       }
     }
-    stage("Docker login") {
-      steps {
-        echo " ============= Docker login ============="
-        withCredentials([usernamePassword(credentialsId: 'dockerhub_official', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-        sh """
-        docker login -u $USERNAME -p $PASSWORD
-        """
-      }
-    }
+
     stage("Deploy") {
       steps {
         echo " ============= Deploy Started ========="
-        sh 'docker push $ARTIFACT_NAME'
+        withDockerRegistry(credentialsId: 'dockerhub_official', url: '') {
+          sh 'docker push $ARTIFACT_NAME:$BUILD_ID'
+          sh 'docker push $ARTIFACT_NAME:latest'
+        }
         sh 'docker run --rm -p 8081:5000 -d $ARTIFACT_NAME'
       }
+    }
+  }
+
+  post {
+    always {
+      deleteDir()
     }
   }
 }
