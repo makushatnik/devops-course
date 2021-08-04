@@ -10,8 +10,7 @@
 7. Spring
 8. Docker/Docker Compose
 9. SonarQube
-10. Rsyslog
-11. Git
+10. Git
 
 ## Preparing for running
 
@@ -53,20 +52,24 @@ Then add in the end of the .bashrc file:
     sudo curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/bin/docker-compose
     sudo chmod +x /usr/bin/docker-compose
 	
-### Install SonarQube
-Go to [SonarQube](https://www.sonarqube.org/downloads/) and download Community Edition. After that type some commands:
+### SonarQube
+Run SonarQube:
+`docker-compose -f sonarqube.yml up`
+and add 3 projects there, get 3 access tokens.
 
 ### Install Gitlab
 Go to another server on CentOS Linux and install Gitlab.  
 Preparing:
+
     sudo yum install openssh-server
     sudo yum install postfix
     sudo systemctl enable postfix
     sudo systemctl start postfix
     sudo systemctl stop firewalld
-    sudo setenforce 0  
+    sudo setenforce 0
 
-Installing Ruby on Rails:
+Install Ruby on Rails:
+
     sudo yum install -y curl gpg gcc gcc-c++ make patch autoconf automake bison libffi-devel libtool patch readline-devel sqlite-devel zlib-devel openssl-devel
     sudo gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
     curl -sSL https://get.rvm.io | bash -s stable
@@ -77,22 +80,18 @@ Installing Ruby on Rails:
     gem install bundler
     gem install rails
 
-Installing Gitlab:
-	curl -O https://downloads-packages.s3.amazonaws.com/centos-7.0.1406/gitlab-7.4.3_omnibus.5.1.0.ci-1.el7.x86_64.rpm
+Install Gitlab:
+
+    curl -O https://downloads-packages.s3.amazonaws.com/centos-7.0.1406/gitlab-7.4.3_omnibus.5.1.0.ci-1.el7.x86_64.rpm
     sudo rpm -ivh gitlab-7.4.3_omnibus.5.1.0.ci-1.el7.x86_64.rpm
     (hostname --fqdn)
     sudo nano /opt/gitlab/embedded/cookbooks/gitlab/libraries/gitlab.rb
     sudo gitlab-ctl reconfigure
-	sudo nano /opt/gitlab/embedded/cookbooks/package/files/default/gitlab-runsvdir.conf
-	(#start on runlevel [2345])
-	/opt/gitlab/embedded/cookbooks/cache/cookbooks/gitlab/libraries/gitlab_rails.rb:
-	uri = URI(Gitlab['external_url'].to_s)
-	sudo ln -sf /usr/lib/systemd/system/gitlab-runsvdir.service /etc/systemd/system/default.target.wants/gitlab-runsvdir.service
-	sudo nano /opt/gitlab/embedded/service/gitlab-rails/app/models/key.rb
-	sudo gitlab-ctl restart
-	/etc/gitlab/initial_root_password
-	
-Go into Gitlab web interface and change root password, create new users, every user need to check email for sign in link and change password:
+    sudo gitlab-ctl restart
+Get password from:  
+`/etc/gitlab/initial_root_password`  
+and paste it in the web-interface, change root password.  
+Create new users, every user need to check email for sign in link and change password:  
 `mail -u <user>`  
 Generate SSH:  
 `ssh-keygen -t rsa -C "user1@centos7.local"`  
@@ -105,10 +104,10 @@ and add it in web-interface.
       /etc/apt/sources.list.d/jenkins.list'
     sudo apt-get update
     sudo apt-get install jenkins
-	sudo usermod -aG docker jenkins
+    sudo usermod -aG docker jenkins
     su - jenkins
     ssh-keygen
-	Then paste ~/.ssh/id_rsa into Jenkins and ~/.ssh/id_rsa.pub into Github settings.
+Then paste `~/.ssh/id_rsa` into Jenkins and `~/.ssh/id_rsa.pub` into Github/Gitlab settings.
 Plugins needed:
 1. Git  
 2. Pipeline  
@@ -131,7 +130,7 @@ You need to get access to your Linux server by **SSH** or something, upload xml 
 `docker run -d -p 8083:8080 -t spring_hello:0.0.1`
 
 ## Using
-Jenkins build jobs save images in the (official docker registry)[http://hub.docker.com].
+Jenkins build jobs save images in the [official docker registry](http://hub.docker.com).
 
 ### Continuous Integration
 This is the part about code linting, build, test and getting results back into Git service.  
@@ -151,7 +150,6 @@ I had encountered with some troubles:
 I avoided that problem using CentOS instead. Docker **golang:latest** image is better option.  
 2. There're some issues with installing SonarQube locally.  
 I solved these issues by installing Docker Compose and using SonarQube in a Docker image.  
-3. I don't have outer IP, so Github Webhooks wouldn't work. Until I figure how to install Nginx on Windows and make some configs.
 
 ### Further development
 * If I had enough time, I would replace Github by Gitlab and replace Docker images there.  
