@@ -41,6 +41,7 @@ pipeline {
         rm -rf ${WORKSPACE}/tricky_bash
         mv -f ${WORKSPACE}/exam/flask/* ${WORKSPACE}/
         rm -rf ${WORKSPACE}/exam
+        mkdir -p ${WORKSPACE}/tests
         '''
       }
     }
@@ -59,6 +60,7 @@ pipeline {
     }
 
     stage("Test") {
+      options { retry(3) }
       steps {
         echo "============= Tests Started ========="
         withPythonEnv('python3') {

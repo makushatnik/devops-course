@@ -47,7 +47,7 @@ Continuous Integration part.</description>
           <excludeBranchesSpec></excludeBranchesSpec>
           <sourceBranchRegex></sourceBranchRegex>
           <targetBranchRegex></targetBranchRegex>
-          <secretToken>{AQAAABAAAAAwwA+qkpSNGpPoiQflLSXWujzLRbux8udGdsCnOAUXFwrSinaofN5gtudPoXz+X/+cILO5aI/oJna67Q5vWKSe5A==}</secretToken>
+          <secretToken>{AQAAABAAAAAwfF4H0+W6m1/YquJQQQR9sJVmzB4U4ExvQ0ycqtuf2SoHfBbsRVGu/Y75IAJHrSDKTMgKIb8YNiULqHDz985VvA==}</secretToken>
           <pendingBuildName></pendingBuildName>
           <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>
         </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
@@ -64,6 +64,28 @@ Continuous Integration part.</description>
         git branch: &apos;dev&apos;, changelog: false, credentialsId: &apos;github-ssh&apos;, poll: false, url: &apos;git@github.com:makushatnik/devops-course.git&apos;
       }
     }
+    stage(&apos;Preparing&apos;) {
+      steps {
+        echo &quot;============= Preparing Started ================&quot;
+        sh &apos;&apos;&apos;
+        rm -rf ${WORKSPACE}/conf
+        rm -rf ${WORKSPACE}/about
+        rm -rf ${WORKSPACE}/animals_sounds
+        rm -rf ${WORKSPACE}/awscli
+        rm -rf ${WORKSPACE}/chatbot
+        rm -rf ${WORKSPACE}/cloudform
+        rm -rf ${WORKSPACE}/docker
+        rm -rf ${WORKSPACE}/github
+        rm -rf ${WORKSPACE}/kubernetes
+        rm -rf ${WORKSPACE}/terraform
+        rm -rf ${WORKSPACE}/til
+        rm -rf ${WORKSPACE}/tricky_bash
+        mv -f ${WORKSPACE}/exam/gin/* ${WORKSPACE}/
+        rm -rf ${WORKSPACE}/exam
+        mkdir -p ${WORKSPACE}/tests
+        &apos;&apos;&apos;
+      }
+    }
     stage(&quot;SonarQube&quot;) {
       agent { docker {
           image &apos;newtmitch/sonar-scanner&apos;
@@ -77,14 +99,18 @@ Continuous Integration part.</description>
       }
     }
     stage(&quot;Test&quot;) {
+      options { retry(3) }
       agent { docker {
           image &apos;golang&apos;
           reuseNode true
       } }
+      environment {
+        XDG_CACHE_HOME=&apos;/tmp/.cache&apos;
+      }
       steps {
         echo &quot;============= Tests Started =========&quot;
         sh &apos;mkdir -p ${GOPATH}/src/webserver&apos;
-        sh &apos;cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver&apos;
+        sh &apos;cp -f ${WORKSPACE}/go.mod ${WORKSPACE}/go.sum ${WORKSPACE}/*.go ${GOPATH}/src/webserver&apos;
         sh &apos;go get github.com/gin-gonic/gin&apos;
         sh &apos;go get github.com/stretchr/testify/assert&apos;
         sh &apos;go clean -cache&apos;
@@ -105,11 +131,16 @@ Continuous Integration part.</description>
       steps {
         echo &quot;============= Build Started =========&quot;
         sh &apos;mkdir -p ${GOPATH}/src/webserver&apos;
-        sh &apos;cp -f ${WORKSPACE}/exam/gin/go.mod ${WORKSPACE}/exam/gin/go.sum ${WORKSPACE}/exam/gin/*.go ${GOPATH}/src/webserver&apos;
+        sh &apos;cp -f ${WORKSPACE}/go.mod ${WORKSPACE}/go.sum ${WORKSPACE}/*.go ${GOPATH}/src/webserver&apos;
         sh &apos;go get github.com/gin-gonic/gin&apos;
         sh &apos;go get github.com/stretchr/testify/assert&apos;
         sh &apos;go build webserver&apos;
       }
+    }
+  }
+  post {
+    always {
+      deleteDir()
     }
   }
 }</script>
