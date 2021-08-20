@@ -1,4 +1,4 @@
-// Telegram's ChatBot v1.6 created by Evgeny Ageev
+// Telegram's ChatBot v1.7 created by Evgeny Ageev
 
 package main
 
@@ -23,6 +23,7 @@ type config struct {
   Cv     string
   Skype  string
   Email  string
+  Phone  string
   Debug  bool
 }
 
@@ -78,7 +79,7 @@ func main() {
   repo   := Config.Repo
   cv     := Config.Cv
   paypal := Config.Email
-  contacts := fmt.Sprintf("Skype: %s\nEmail: %s", Config.Skype, Config.Email)
+  contacts := fmt.Sprintf("Skype: %s\nEmail: %s\nPhone: %s", Config.Skype, Config.Email, Config.Phone)
   mainTree := concat(Config.Repo, "/tree/main/")
   for _, tt := range Tasks {
     FmtTasks = concat(FmtTasks, fmt.Sprintf("%s - %s %s \n", tt.Name, UseLinkMsg, tt.Command))

@@ -85,7 +85,7 @@
     stat: path="{{binDir}}/chatbot"
     register: bin_stat
 
-  - name: Go Build Task
+  - name: Go Build (Optional Task)
     command: go build chatbot
     when: not bin_stat.stat.exists
 
