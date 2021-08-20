@@ -22,7 +22,7 @@ func getConfig(fileName string) config {
   file, fileErr := os.Open(path)
   LogError(fileErr)
   if fileErr != nil {
-    log.Panic("File absent")
+    log.Panic("Config file is absent")
     os.Exit(1)
   }
   // Getting the Config File's content
